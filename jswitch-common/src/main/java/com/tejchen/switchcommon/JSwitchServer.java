@@ -1,6 +1,6 @@
 package com.tejchen.switchcommon;
 
-public enum ServerEnum {
+public enum JSwitchServer {
     ZooKeeper,
     Default,
 }

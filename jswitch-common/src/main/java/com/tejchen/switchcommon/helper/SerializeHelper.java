@@ -1,16 +1,21 @@
-package com.tejchen.switchcommon;
+package com.tejchen.switchcommon.helper;
 import com.alibaba.fastjson.JSON;
-import com.tejchen.switchcommon.SwitchException;
+import com.alibaba.fastjson.TypeReference;
+import com.tejchen.switchcommon.JSwitchException;
 
 import java.math.BigDecimal;
 
 public class SerializeHelper {
 
-    public static <T> T deserializeProtocol(Class<T> t, String target) {
+    public static <T> T deserializeJson(String target, Class<T> t) {
         return JSON.parseObject(target, t);
     }
 
-    public static String serializeProtocol(Object target) {
+    public static <T> T deserializeJson(String target, TypeReference<T> t) {
+        return JSON.parseObject(target, t);
+    }
+
+    public static String serializeJson(Object target) {
         return JSON.toJSONString(target);
     }
 
@@ -35,7 +40,7 @@ public class SerializeHelper {
         if (isValidJson(target)) {
             return JSON.parseObject(target, aClass);
         }
-        throw new SwitchException(String.format("unSupport type, type:%s, config:%s", aClass, target));
+        throw new JSwitchException(String.format("unSupport type, type:%s, config:%s", aClass, target));
     }
 
     public static String serialize(Object target) {

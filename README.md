@@ -1,5 +1,5 @@
 # switch
-动态切换
+动态切换（还在编码中，请静候）
 
 client
 分模块
@@ -17,5 +17,6 @@ client
 5. 
 
 
-server
-待定
+服务端原型
+
+![服务端原型](jswitch-server/src/main/resource/frontend/image/temp.jpg)

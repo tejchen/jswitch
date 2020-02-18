@@ -4,6 +4,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SwitchItem {
-    String desc() default "";
+public @interface JSwitchNamespace {
+    String value() default "";
 }

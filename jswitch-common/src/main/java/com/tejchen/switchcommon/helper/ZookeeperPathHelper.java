@@ -1,4 +1,4 @@
-package com.tejchen.switchcommon;
+package com.tejchen.switchcommon.helper;
 
 public class ZookeeperPathHelper {
 

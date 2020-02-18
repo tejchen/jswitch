@@ -1,6 +1,5 @@
-import com.tejchen.switchclient.annotation.SwitchApp;
-import com.tejchen.switchclient.annotation.SwitchItem;
-import com.tejchen.switchclient.annotation.SwitchNamespace;
+import com.tejchen.switchclient.annotation.JSwitch;
+import com.tejchen.switchclient.annotation.JSwitchNamespace;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -8,29 +7,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SwitchApp("switch")
-@SwitchNamespace("abc")
+@JSwitchNamespace("abc")
 public class BaseServiceTestConfig {
 
-    @SwitchItem
+    @JSwitch
     public static String testString = "hi~";
-    @SwitchItem
+    @JSwitch
     public static int testInt = 1;
-    @SwitchItem
+    @JSwitch
     public static long testLong = 2;
-    @SwitchItem
+    @JSwitch
     public static BigDecimal testBigDecimal = new BigDecimal("0.1");
-    @SwitchItem
+    @JSwitch
     public static boolean testBool = false;
-    @SwitchItem
+    @JSwitch
     public static List<String> testList = new ArrayList<String>(){{
         add("list item 1");
     }};
-    @SwitchItem
+    @JSwitch
     public static List<BaseServiceTestConfigItem> testListObject = new ArrayList<BaseServiceTestConfigItem>(){{
         add(new BaseServiceTestConfigItem("list obj 1"));
     }};
-    @SwitchItem
+    @JSwitch
     public static List<Map<String, List<String>>> testListMap  = new ArrayList<Map<String, List<String>>>(){{
         add(new HashMap<String, List<String>>(){{
             put("mapKey", new ArrayList<String>() {{
@@ -38,14 +36,14 @@ public class BaseServiceTestConfig {
             }});
         }});
     }};
-    @SwitchItem
+    @JSwitch
     public static Map<String, String> testMap = new HashMap<String, String>(){{
         put("mapKey", "value");
     }};
-    @SwitchItem
+    @JSwitch
     public static Map<String, BaseServiceTestConfigItem> testMapObject = new HashMap<String, BaseServiceTestConfigItem>(){{
         put("mapKey", new BaseServiceTestConfigItem("map obj 1"));
     }};
-    @SwitchItem
+    @JSwitch
     public static BaseServiceTestConfigItem testObj = new BaseServiceTestConfigItem("obj 1");
 }

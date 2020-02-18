@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JswitchServerApplication {
+public class JSwitchServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(JswitchServerApplication.class, args);
+		SpringApplication.run(JSwitchServerApplication.class, args);
 	}
 
 }

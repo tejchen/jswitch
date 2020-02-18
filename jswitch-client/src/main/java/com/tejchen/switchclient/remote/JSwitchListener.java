@@ -1,10 +1,10 @@
 package com.tejchen.switchclient.remote;
 
-public interface SwitchListener {
+public interface JSwitchListener {
 
     String listenApp();
 
     String listenKey();
 
-    void configUpdated(String newConfigText);
+    boolean onChange(String newConfigText);
 }

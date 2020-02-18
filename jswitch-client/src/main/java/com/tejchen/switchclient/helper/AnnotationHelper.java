@@ -1,10 +1,10 @@
 package com.tejchen.switchclient.helper;
 
-import com.tejchen.switchclient.annotation.SwitchApp;
-import com.tejchen.switchclient.model.SwitchConfig;
-import com.tejchen.switchclient.annotation.SwitchItem;
-import com.tejchen.switchclient.annotation.SwitchNamespace;
-import com.tejchen.switchcommon.SwitchException;
+import com.tejchen.switchclient.model.JSwitchConfig;
+import com.tejchen.switchclient.annotation.JSwitch;
+import com.tejchen.switchclient.annotation.JSwitchNamespace;
+import com.tejchen.switchcommon.JSwitchException;
+import com.tejchen.switchcommon.helper.SerializeHelper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,58 +12,32 @@ import java.util.List;
 
 public class AnnotationHelper {
 
-    public static List<SwitchConfig> parseAnnotation(Class[] classes){
+    public static List<JSwitchConfig> parseAnnotation(String appName, Class[] classes){
         if (classes == null || classes.length == 0){
-            throw new SwitchException("empty classes!");
+            throw new JSwitchException("empty classes!");
         }
-        List<SwitchConfig> resultList = new ArrayList<SwitchConfig>();
+        List<JSwitchConfig> resultList = new ArrayList<JSwitchConfig>();
         for (Class aClass : classes) {
-            resultList.addAll(parseAnnotation(aClass));
+            resultList.addAll(parseAnnotation(appName, aClass));
         }
         return resultList;
     }
 
-    public static List<SwitchConfig> parseAnnotation(Class aClass){
-        List<SwitchConfig> resultList = new ArrayList<SwitchConfig>();
+    public static List<JSwitchConfig> parseAnnotation(String appName, Class aClass){
+        List<JSwitchConfig> resultList = new ArrayList<JSwitchConfig>();
         if (aClass == null){
             return resultList;
         }
-        SwitchApp app = (SwitchApp) aClass.getDeclaredAnnotation(SwitchApp.class);
-        if (app == null || app.value() == null) {
-            throw new SwitchException(String.format("%s must add SwitchApp annotation！but not", aClass.getName()));
-        }
-        String key = "";
-        SwitchNamespace namespace = (SwitchNamespace) aClass.getDeclaredAnnotation(SwitchNamespace.class);
-        if (namespace != null) {
-            key = namespace.value()+"_";
-        }
+        JSwitchNamespace namespace = (JSwitchNamespace) aClass.getDeclaredAnnotation(JSwitchNamespace.class);
         Field[] fields = aClass.getFields();
         for (Field field : fields) {
-            SwitchItem item = field.getDeclaredAnnotation(SwitchItem.class);
-            if (item == null) {
+            JSwitch jswitch = field.getDeclaredAnnotation(JSwitch.class);
+            if (jswitch == null) {
                 continue;
             }
-            String configKey = key + aClass.getSimpleName() + "#" + field.getName();
-            SwitchConfig config = new SwitchConfig();
-            config.setConfigApp(app.value());
-            config.setConfigKey(configKey);
-            config.setConfigOrigin(aClass);
-            config.setConfigItem(field);
-            config.setConfigDefaultValue(getDefaultValue(field, aClass));
+            JSwitchConfig config = new JSwitchConfig(appName, namespace, jswitch, field);
             resultList.add(config);
         }
         return resultList;
-    }
-
-    private static Object getDefaultValue(Field field, Class aClass){
-        if (field == null) {
-            return null;
-        }
-        try {
-            return field.get(aClass);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }
