@@ -3,6 +3,10 @@ package com.tejchen.jswitchserver.web;
 import com.tejchen.jswitchserver.helper.ResponseHelper;
 import com.tejchen.switchcommon.helper.HttpPathHelper;
 import com.tejchen.switchcommon.protocol.http.*;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchBatchPull;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchBatchPullItem;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchHttpBatchForm;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchPushForm;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

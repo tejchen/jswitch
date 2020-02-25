@@ -4,7 +4,7 @@ import com.tejchen.switchcommon.JSwitchException;
 
 public class HttpPathHelper {
 
-    private static final String httpBasePath = "/jswitch";
+    private static final String httpBasePath = "/jswitch/client";
     public static final String httpPingPath = httpBasePath + "/ping";
     public static final String httpPushPath = httpBasePath + "/push";
     public static final String httpBatchPath = httpBasePath + "/batch";

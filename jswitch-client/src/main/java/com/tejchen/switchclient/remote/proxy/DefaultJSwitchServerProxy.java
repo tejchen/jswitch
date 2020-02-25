@@ -7,7 +7,12 @@ import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import com.tejchen.switchcommon.JSwitchException;
 import com.tejchen.switchcommon.helper.HttpPathHelper;
 import com.tejchen.switchcommon.helper.SerializeHelper;
-import com.tejchen.switchcommon.protocol.http.*;
+import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponse;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchBatchPull;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchBatchPullItem;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchHttpBatchForm;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchPushForm;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchPushItem;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
@@ -102,7 +107,8 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
             logger.error("http connect err!");
             return false;
         }
-        return response.isSuccess();
+        //todo response.isSuccess()
+        return true;
     }
 
     public boolean addListener(JSwitchListener listener) {

@@ -13,7 +13,20 @@ public class JSwitchHttpResponse<T> {
 
     private T data;
 
-    public boolean isSuccess() {
-        return code.equals("100000");
+    public JSwitchHttpResponse(){
+        this.code = "100000";
+        this.message = "成功";
     }
+
+    public JSwitchHttpResponse(String code, String message){
+        this.code = code;
+        this.message = message;
+    }
+
+    public JSwitchHttpResponse(String code, String message, T data){
+        this.code = code;
+        this.message = message;
+        this.data = data;
+    }
+
 }
