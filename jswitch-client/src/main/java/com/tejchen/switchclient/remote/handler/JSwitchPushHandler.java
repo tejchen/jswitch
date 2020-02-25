@@ -4,7 +4,7 @@ package com.tejchen.switchclient.remote.handler;
 import com.tejchen.switchclient.model.JSwitchConfig;
 import com.tejchen.switchclient.remote.JSwitchRemoteHandle;
 import com.tejchen.switchcommon.JSwitchException;
-import com.tejchen.switchcommon.protocol.http.JSwitchPushItem;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchPushItem;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import lombok.Getter;
 import lombok.Setter;

@@ -4,11 +4,11 @@ import com.tejchen.switchcommon.JSwitchException;
 
 public class HttpPathHelper {
 
-    private static final String httpBasePath = "/jswitch";
+    private static final String httpBasePath = "/jswitch/client";
     public static final String httpPingPath = httpBasePath + "/ping";
     public static final String httpPushPath = httpBasePath + "/push";
     public static final String httpBatchPath = httpBasePath + "/batch";
-    public static final String httpVersionPath = httpBasePath + "/version/{appName}";
+    public static final String httpHeartbeatPath = httpBasePath + "/heartbeat/{appCode}";
 
 //    public static String getConfigPath(String appName, String configKey){
 //        if (appName == null || appName.isEmpty()){

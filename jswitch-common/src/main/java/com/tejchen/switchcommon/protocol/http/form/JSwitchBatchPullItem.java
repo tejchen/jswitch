@@ -1,4 +1,4 @@
-package com.tejchen.switchcommon.protocol.http;
+package com.tejchen.switchcommon.protocol.http.form;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class JSwitchBatchPullItem {
+public class JSwitchBatchPullItem  {
 
     private String key;
 

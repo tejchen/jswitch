@@ -8,13 +8,10 @@ import java.util.List;
 
 public class BaseServiceTest {
 
-    @Test
     public void TestClientBaseService() throws InterruptedException {
-        System.out.println("默认配置：");
         JSwitchContext ctx = new JSwitchContext("http://127.0.0.1:8080", JSwitchServer.Default);
         JSwitchManager manager = JSwitchManager.newSwitchManager(ctx);
         manager.init("switch", BaseServiceTestConfig.class);
-        System.out.println("初始化配置：");
         List list = new ArrayList<>();
         list.add(BaseServiceTestConfig.testString);
         list.add(BaseServiceTestConfig.testBool);

@@ -1,4 +1,4 @@
-package com.tejchen.switchcommon.protocol.http;
+package com.tejchen.switchcommon.protocol.http.form;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +12,13 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class JSwitchHttpBatchForm {
-
-    @NotNull
-    private String appName;
+public class JSwitchHttpBatchForm extends JSwitchBaseForm {
 
     @NotEmpty
     private List<String> keys;
+
+    @Override
+    public String getSignValue() {
+        return null;
+    }
 }
