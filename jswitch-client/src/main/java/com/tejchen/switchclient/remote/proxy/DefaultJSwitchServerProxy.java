@@ -8,6 +8,7 @@ import com.tejchen.switchcommon.JSwitchException;
 import com.tejchen.switchcommon.helper.HttpPathHelper;
 import com.tejchen.switchcommon.helper.SerializeHelper;
 import com.tejchen.switchcommon.protocol.http.*;
+import com.tejchen.switchcommon.protocol.http.form.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;

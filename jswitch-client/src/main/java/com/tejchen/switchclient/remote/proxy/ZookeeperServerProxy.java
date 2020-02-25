@@ -5,7 +5,7 @@ import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import com.tejchen.switchcommon.JSwitchException;
 import com.tejchen.switchcommon.helper.SerializeHelper;
 import com.tejchen.switchcommon.helper.ZookeeperPathHelper;
-import com.tejchen.switchcommon.protocol.http.JSwitchPushItem;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchPushItem;
 import com.tejchen.switchcommon.protocol.zookeeper.ZkPushItem;
 import com.tejchen.switchcommon.protocol.zookeeper.ZkPushProtocol;
 import com.tejchen.switchcommon.protocol.zookeeper.ZkSinglePullProtocol;

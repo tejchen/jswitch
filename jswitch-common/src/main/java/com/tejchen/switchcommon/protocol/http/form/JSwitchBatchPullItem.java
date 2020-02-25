@@ -1,4 +1,4 @@
-package com.tejchen.switchcommon.protocol.http;
+package com.tejchen.switchcommon.protocol.http.form;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package com.tejchen.switchclient.remote;
 
-import com.tejchen.switchcommon.protocol.http.JSwitchPushItem;
+import com.tejchen.switchcommon.protocol.http.form.JSwitchPushItem;
 
 import java.util.List;
 import java.util.Map;
