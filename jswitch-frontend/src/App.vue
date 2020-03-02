@@ -4,7 +4,7 @@
       <Header>
         <Menu mode="horizontal" theme="dark">
           <div class="layout-logo">
-            <img src="@/assets/LOGO.png" style="height: 100%">
+            <img src="@/assets/logo.png" style="height: 100%">
           </div>
           <div class="layout-nav">
             <MenuItem name="1">
