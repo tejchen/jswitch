@@ -5,8 +5,6 @@ import com.tejchen.jswitchserver.base.BizResult;
 import com.tejchen.switchcommon.protocol.http.JSwitchHttpPage;
 import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponse;
 
-import java.util.List;
-
 public class ResponseHelper {
 
     public static JSwitchHttpResponse success(){
@@ -29,13 +27,18 @@ public class ResponseHelper {
         return response;
     }
 
+    public static JSwitchHttpResponse with(BizResult bizResult,  String message){
+        JSwitchHttpResponse response = new JSwitchHttpResponse(bizResult.getCode(), message);
+        return response;
+    }
+
     public static JSwitchHttpResponse withPage(Page page){
         JSwitchHttpResponse response = new JSwitchHttpResponse();
         JSwitchHttpPage pageData = new JSwitchHttpPage();
         pageData.setPageNo(page.getCurrent());
-        pageData.setPageSize((long) page.getRecords().size());
+        pageData.setPageSize(page.getSize());
         pageData.setTotal(page.getTotal());
-        pageData.setTotalPage(page.getTotal()/page.getSize());
+        pageData.setTotalPage((long)Math.ceil((1.0*page.getTotal())/page.getSize()));
         pageData.setDataList(page.getRecords());
         response.setData(pageData);
         return response;

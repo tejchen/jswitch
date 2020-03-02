@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tejchen.jswitchserver.base.BizResult;
 import com.tejchen.jswitchserver.base.ServerBizException;
+import com.tejchen.jswitchserver.model.JSwitchAppForm;
 import com.tejchen.jswitchserver.mapper.JSwitchApp;
-import com.tejchen.jswitchserver.mapper.JSwitchAppMapper;
 import com.tejchen.jswitchserver.helper.ResponseHelper;
+import com.tejchen.jswitchserver.service.JSwitchAppService;
 import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,12 +19,11 @@ import org.springframework.web.bind.annotation.*;
 public class JSwitchAppController {
 
     @Autowired
-    private JSwitchAppMapper appMapper;
-
+    private JSwitchAppService appService;
 
     @RequestMapping("/detail/{appCode}")
     public JSwitchHttpResponse get(@PathVariable("appCode") String appCode){
-        JSwitchApp app = appMapper.getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appCode));
+        JSwitchApp app = appService.getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appCode));
         if (app == null){
             ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
         }
@@ -31,8 +32,10 @@ public class JSwitchAppController {
 
     @RequestMapping("/list")
     public JSwitchHttpResponse get(@RequestParam(required = false) String keyword, @RequestParam Integer page, @RequestParam Integer pageSize){
-        Wrapper<JSwitchApp> wrapper = Wrappers.<JSwitchApp>lambdaQuery().likeRight(JSwitchApp::getAppCode, keyword);
-        Page result = appMapper.page(new Page(page, pageSize), wrapper);
+        Wrapper<JSwitchApp> wrapper = Wrappers.<JSwitchApp>lambdaQuery()
+                .likeRight(JSwitchApp::getAppCode, keyword == null ? "" : keyword)
+                .orderByDesc(JSwitchApp::getGmtModified);
+        Page result = appService.page(new Page(page, pageSize), wrapper);
         if (result == null){
             ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
         }
@@ -40,8 +43,19 @@ public class JSwitchAppController {
     }
 
     @RequestMapping("/save")
-    public JSwitchHttpResponse save(@RequestBody JSwitchApp app){
-        boolean result = appMapper.save(app);
+    public JSwitchHttpResponse save(@Validated @RequestBody JSwitchAppForm appForm){
+        JSwitchApp checkExist = appService.getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appForm.getAppCode()));
+        if (checkExist != null){
+            ServerBizException.throwException(BizResult.DATA_ALREADY_EXIST);
+        }
+        JSwitchApp app =  new JSwitchApp();
+        app.setAppCode(appForm.getAppCode());
+        app.setAppName(appForm.getAppName());
+        app.setAppOwner("tejchen");
+        app.setCreateUser("admin");
+        app.setLastOperateUser("admin");
+        app.setAppDesc(appForm.getAppDesc());
+        boolean result = appService.save(app);
         if (!result){
             ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
         }

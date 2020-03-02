@@ -8,19 +8,23 @@ import lombok.Setter;
 
 @Setter
 @Getter
-@TableName("jswitch_app")
-public class JSwitchApp {
+@TableName("jswitch_app_config")
+public class JSwitchAppConfig {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
     private String appCode;
 
-    private String appName;
+    private String appConfigCode;
 
-    private String appDesc;
+    private String appConfigName;
 
-    private String appOwner;
+    private String appConfigContent;
+
+    private String appConfigDesc;
+
+    private String appConfigSource;
 
     private String gmtCreate;
 

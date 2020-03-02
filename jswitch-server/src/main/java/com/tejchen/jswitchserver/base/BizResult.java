@@ -6,7 +6,7 @@ import lombok.Setter;
 public enum  BizResult {
 
     SUCCESS("100000", "成功"),
-    FAIL("100001", "请求失败"),
+    FAIL("100001", "请求服务失败"),
     DATA_ALREADY_EXIST("100002", "数据已存在"),
     DATA_NOT_EXIST("100003", "数据不存在"),
     ;

@@ -29,12 +29,4 @@ public class JSwitchHttpResponse<T> {
         this.data = data;
     }
 
-
-    public boolean isSuccess() {
-        return code.equals("100000");
-    }
-
-    public boolean isFail() {
-        return isSuccess();
-    }
 }

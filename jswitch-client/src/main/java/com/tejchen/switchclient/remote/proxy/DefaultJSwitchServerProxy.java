@@ -103,7 +103,8 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
             logger.error("http connect err!");
             return false;
         }
-        return response.isSuccess();
+        //todo response.isSuccess()
+        return true;
     }
 
     public boolean addListener(JSwitchListener listener) {

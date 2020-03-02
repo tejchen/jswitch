@@ -4,6 +4,7 @@
 1. 技术选型：
 前端：vue、iview
 后端：springboot、mybaits、mybatis-plus、mysql
+开发工具：IDEA、HBuilderX
 
 
 服务端原型

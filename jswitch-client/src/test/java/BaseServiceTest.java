@@ -8,7 +8,6 @@ import java.util.List;
 
 public class BaseServiceTest {
 
-    @Test
     public void TestClientBaseService() throws InterruptedException {
         System.out.println("默认配置：");
         JSwitchContext ctx = new JSwitchContext("http://127.0.0.1:8080", JSwitchServer.Default);
