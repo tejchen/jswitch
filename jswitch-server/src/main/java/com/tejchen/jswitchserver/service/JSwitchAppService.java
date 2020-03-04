@@ -6,4 +6,5 @@ import com.tejchen.jswitchserver.mapper.JSwitchApp;
 
 public interface JSwitchAppService extends IService<JSwitchApp> {
 
+    Long pushAndGet(String appCode);
 }

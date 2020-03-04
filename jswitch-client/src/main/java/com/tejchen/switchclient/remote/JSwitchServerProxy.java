@@ -13,23 +13,23 @@ public interface JSwitchServerProxy {
      * @param server
      * @return
      */
-    boolean connect(String appName, String server);
+    boolean connect(String appCode, String server);
 
     /**
      * 拉取配置
-     * @param appName
+     * @param appCode
      * @param keys
      * @return
      */
-    Map<String, String> pull(String appName, List<String> keys);
+    Map<String, String> pull(String appCode, List<String> keys);
 
     /**
      * 推送配置
-     * @param appName
+     * @param appCode
      * @param JSwitchPushItems
      * @return
      */
-    boolean push(String appName, List<JSwitchPushItem> JSwitchPushItems);
+    boolean push(String appCode, List<JSwitchPushItem> JSwitchPushItems);
 
     /**
      * 添加监听器

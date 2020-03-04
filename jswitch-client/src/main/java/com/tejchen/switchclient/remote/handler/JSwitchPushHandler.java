@@ -9,6 +9,8 @@ import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 @Getter
 @ToString
 public class JSwitchPushHandler implements JSwitchRemoteHandle<JSwitchConfig> {
+    private static final Logger logger = LoggerFactory.getLogger(JSwitchPushHandler.class);
 
     private JSwitchServerProxy          proxy;
 
@@ -41,7 +44,8 @@ public class JSwitchPushHandler implements JSwitchRemoteHandle<JSwitchConfig> {
             List<JSwitchPushItem> items = jswitchConfigs.stream().map(jswitchConfig->{
                 JSwitchPushItem item = new JSwitchPushItem();
                 item.setType(jswitchConfig.getConfigOrigin().getTypeName());
-                item.setConfigKey(jswitchConfig.getConfigKey());
+                item.setConfigCode(jswitchConfig.getConfigCode());
+                item.setConfigName(jswitchConfig.getConfigName().equals("") ? jswitchConfig.getConfigCode() : jswitchConfig.getConfigName());
                 item.setDefaultValue(jswitchConfig.getConfigDefaultValue());
                 return item;
             }).collect(Collectors.toList());
@@ -49,6 +53,7 @@ public class JSwitchPushHandler implements JSwitchRemoteHandle<JSwitchConfig> {
             if (!pushResult){
                 throw new JSwitchException("push local config err!");
             }
+            logger.info("push data: {}", items);
         }
     }
 }

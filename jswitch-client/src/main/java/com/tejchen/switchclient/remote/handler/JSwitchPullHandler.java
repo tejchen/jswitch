@@ -36,13 +36,13 @@ public class JSwitchPullHandler implements JSwitchRemoteHandle<JSwitchConfig> {
 
     public void handle() {
         if (!this.jswitchConfigs.isEmpty()) {
-            List<String> keys = jswitchConfigs.stream().map(JSwitchConfig::getConfigKey).collect(Collectors.toList());
+            List<String> keys = jswitchConfigs.stream().map(JSwitchConfig::getConfigCode).collect(Collectors.toList());
             Map<String, String> result = proxy.pull(appName, keys);
             if (result == null){
                 return;
             }
             for (JSwitchConfig jswitchConfig : jswitchConfigs) {
-                String configValue = result.get(jswitchConfig.getConfigKey());
+                String configValue = result.get(jswitchConfig.getConfigCode());
                 if (configValue == null){
                     continue;
                 }

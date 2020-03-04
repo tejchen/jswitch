@@ -2,7 +2,7 @@ import axios from 'axios'
 import iView from 'iview';
 
 const network = {
-    host: "http://119.23.17.187:8080",
+    host: "http://127.0.0.1:8080",
     get: function (uri, params, func, exceptionFunc) {
       axios.get(this.host+uri, params)
         .then(response => {

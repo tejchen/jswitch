@@ -2,9 +2,11 @@ package com.tejchen.switchcommon.protocol.http;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 public class JSwitchHttpResponse<T> {
 
     private String code;

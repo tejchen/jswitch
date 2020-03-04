@@ -24,6 +24,8 @@ public class JSwitchAppConfig {
 
     private String appConfigDesc;
 
+    private String appConfigType;
+
     private String appConfigSource;
 
     private String gmtCreate;

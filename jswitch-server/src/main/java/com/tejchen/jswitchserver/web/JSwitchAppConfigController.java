@@ -9,17 +9,30 @@ import com.tejchen.jswitchserver.base.ServerBizException;
 import com.tejchen.jswitchserver.helper.ResponseHelper;
 import com.tejchen.jswitchserver.mapper.JSwitchApp;
 import com.tejchen.jswitchserver.mapper.JSwitchAppConfig;
+import com.tejchen.jswitchserver.mapper.JSwitchAppNode;
+import com.tejchen.jswitchserver.mapper.JSwitchAppNodeEvent;
+import com.tejchen.jswitchserver.model.JSwitchAppConfigDetailVO;
 import com.tejchen.jswitchserver.model.JSwitchAppConfigForm;
 import com.tejchen.jswitchserver.model.JSwitchAppConfigListVO;
+import com.tejchen.jswitchserver.model.JSwitchAppConfigPushResultForm;
 import com.tejchen.jswitchserver.service.JSwitchAppConfigService;
+import com.tejchen.jswitchserver.service.JSwitchAppNodeEventService;
+import com.tejchen.jswitchserver.service.JSwitchAppNodeService;
 import com.tejchen.jswitchserver.service.JSwitchAppService;
+import com.tejchen.switchcommon.event.AckFLag;
+import com.tejchen.switchcommon.event.JSwitchEvent;
+import com.tejchen.switchcommon.event.JSwitchEventAckData;
+import com.tejchen.switchcommon.helper.SerializeHelper;
 import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/jswitch/app/config")
@@ -31,18 +44,42 @@ public class JSwitchAppConfigController {
     @Autowired
     private JSwitchAppConfigService appConfigService;
 
+    @Autowired
+    private JSwitchAppNodeService appNodeService;
 
-    @RequestMapping("/detail/{appCode}")
-    public JSwitchHttpResponse get(@PathVariable("appCode") String appCode){
+    @Autowired
+    private JSwitchAppNodeEventService nodeEventService;
+
+
+    @RequestMapping("/detail/{appConfigCode}")
+    public JSwitchHttpResponse get(@PathVariable("appConfigCode") String appConfigCode, @RequestParam String appCode){
         JSwitchApp app = appService.getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appCode));
         if (app == null){
             ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
         }
-        return ResponseHelper.success(app);
+        JSwitchAppConfig config = appConfigService.getOne(Wrappers.<JSwitchAppConfig>lambdaQuery()
+                .eq(JSwitchAppConfig::getAppCode, appCode)
+                .eq(JSwitchAppConfig::getAppConfigCode, appConfigCode));
+        if (config == null){
+            ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
+        }
+        List<JSwitchAppNode> nodes = appNodeService.getAliveNodeList(appCode);
+        // 组装结果
+        JSwitchAppConfigDetailVO vo = new JSwitchAppConfigDetailVO();
+        vo.setAppCode(app.getAppCode());
+        vo.setAppName(app.getAppName());
+        vo.setAppConfigCode(config.getAppConfigCode());
+        vo.setAppConfigName(config.getAppConfigName());
+        vo.setAppConfigSource(ConfigCreateSourceEnum.getDescByCode(config.getAppConfigSource()));
+        vo.setAppConfigContent(config.getAppConfigContent());
+        vo.setAppConfigDesc(config.getAppConfigDesc());
+        vo.setAppConfigType(config.getAppConfigType());
+        vo.setAppNodes(nodes.stream().map(x->x.getAppNodeIp()).collect(Collectors.toList()));
+        return ResponseHelper.success(vo);
     }
 
     @RequestMapping("/list")
-    public JSwitchHttpResponse get(@RequestParam(required = false) String keyword, @RequestParam String appCode, @RequestParam Integer page, @RequestParam Integer pageSize){
+    public JSwitchHttpResponse list(@RequestParam(required = false) String keyword, @RequestParam String appCode, @RequestParam Integer page, @RequestParam Integer pageSize){
         JSwitchApp app = appService.getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appCode));
         if (app == null){
             ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
@@ -96,5 +133,94 @@ public class JSwitchAppConfigController {
             ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
         }
         return ResponseHelper.success();
+    }
+
+    @RequestMapping("/update")
+    public JSwitchHttpResponse update(@Validated @RequestBody JSwitchAppConfigForm form){
+        JSwitchAppConfig config = appConfigService.getOne(Wrappers.<JSwitchAppConfig>lambdaQuery()
+                .eq(JSwitchAppConfig::getAppCode, form.getAppCode())
+                .eq(JSwitchAppConfig::getAppConfigCode, form.getAppConfigCode()));
+        if (config == null){
+            ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
+        }
+
+        boolean result = appConfigService.update(Wrappers.<JSwitchAppConfig>lambdaUpdate()
+                .set(JSwitchAppConfig::getAppConfigName, form.getAppConfigName())
+                .set(JSwitchAppConfig::getAppConfigDesc, form.getAppConfigDesc())
+                .eq(JSwitchAppConfig::getAppCode, form.getAppCode())
+                .eq(JSwitchAppConfig::getAppConfigCode, form.getAppConfigCode())
+        );
+        if (!result){
+            ServerBizException.throwException(BizResult.FAIL);
+        }
+        return ResponseHelper.success();
+    }
+
+    @RequestMapping("/push")
+    public JSwitchHttpResponse push(@Validated @RequestBody JSwitchAppConfigForm form){
+        // 校验数据
+        JSwitchAppConfig config = appConfigService.getOne(Wrappers.<JSwitchAppConfig>lambdaQuery()
+                .eq(JSwitchAppConfig::getAppCode, form.getAppCode())
+                .eq(JSwitchAppConfig::getAppConfigCode, form.getAppConfigCode()));
+        if (config == null){
+            ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
+        }
+
+        // 更新数据
+        boolean result = appConfigService.update(Wrappers.<JSwitchAppConfig>lambdaUpdate()
+                .set(JSwitchAppConfig::getAppConfigContent, form.getAppConfigContent())
+                .eq(JSwitchAppConfig::getAppCode, form.getAppCode())
+                .eq(JSwitchAppConfig::getAppConfigCode, form.getAppConfigCode())
+        );
+        if (!result){
+            ServerBizException.throwException(BizResult.FAIL);
+        }
+
+        // 更新版本
+        Long newVersion = appService.pushAndGet(form.getAppCode());
+        if (newVersion == null){
+            ServerBizException.throwException(BizResult.FAIL);
+        }
+
+        // 查看存活机器
+        List<JSwitchAppNode> nodeList = appNodeService.getAliveNodeList(form.getAppCode());
+
+
+        return ResponseHelper.success(new HashMap<String, Object>(){{
+            put("appCode", form.getAppCode());
+            put("appNodes", nodeList);
+            put("appVersion", newVersion);
+        }});
+    }
+
+    @RequestMapping("/pushResult")
+    public JSwitchHttpResponse pushResult(@Validated @RequestBody JSwitchAppConfigPushResultForm form){
+        // 校验数据
+        JSwitchApp app = appService.getOne(Wrappers.<JSwitchApp>lambdaQuery()
+                .eq(JSwitchApp::getAppCode, form.getAppCode()));
+        if (app == null){
+            ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
+        }
+        // 如果已经有新的数据版本，那么认为本次是成功的
+        if (app.getAppVersion() > form.getAppVersion()) {
+            Map<String, String> result = form.getAppNodeTokens().stream().collect(Collectors.toMap(x->x, x->"success"));
+            return ResponseHelper.success(result);
+        }
+        // 搜集节点事件
+        List<JSwitchAppNodeEvent> events = nodeEventService.pickEvents(form.getAppNodeTokens(), JSwitchEvent.ACCEPT_ACK.getCode(), form.getAppCode()+"_"+form.getAppVersion());
+        // 生成结果
+        Map<String, String> result = form.getAppNodeTokens().stream().collect(Collectors.toMap(x->x, x->"pending"));
+        if (result != null && !result.isEmpty()) {
+            for (JSwitchAppNodeEvent event : events) {
+                // 解析
+                JSwitchEventAckData ack = SerializeHelper.deserializeJson(event.getAppNodeEventData(), JSwitchEventAckData.class);
+                if (AckFLag.SUCCESS.equals(ack.getFlag())) {
+                    result.put(event.getAppNodeToken(), "success");
+                }else {
+                    result.put(event.getAppNodeToken(), "fail");
+                }
+            }
+        }
+        return ResponseHelper.success(result);
     }
 }

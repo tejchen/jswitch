@@ -10,11 +10,13 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class JSwitchBatchPull {
+public class JSwitchPull {
 
-    private String appName;
+    private String appCode;
 
-    private List<JSwitchBatchPullItem> values;
+    private Long appVersion;
+
+    private List<JSwitchPullItem> values;
 }
 
 

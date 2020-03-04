@@ -2,6 +2,7 @@ package com.tejchen.switchcommon.helper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.tejchen.switchcommon.JSwitchException;
+import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponseEnhancer;
 
 import java.math.BigDecimal;
 
@@ -45,19 +46,19 @@ public class SerializeHelper {
 
     public static String serialize(Object target) {
         // 基础类型
-        if (target == String.class) {
+        if (target.getClass() == String.class) {
             return String.valueOf(target);
         }
-        if (target == BigDecimal.class) {
+        if (target.getClass() == BigDecimal.class) {
             return target.toString();
         }
-        if (target == Long.class || target == long.class) {
+        if (target.getClass() == Long.class || target == long.class) {
             return String.valueOf(target);
         }
-        if (target == Integer.class || target == int.class) {
+        if (target.getClass() == Integer.class || target == int.class) {
             return String.valueOf(target);
         }
-        if (target == Boolean.class || target == boolean.class) {
+        if (target.getClass() == Boolean.class || target == boolean.class) {
             return String.valueOf(target);
         }
         // 复合类型
@@ -79,4 +80,6 @@ public class SerializeHelper {
             }
         }
     }
+
+
 }

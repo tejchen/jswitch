@@ -2,9 +2,7 @@ package com.tejchen.switchclient.helper;
 
 import com.tejchen.switchclient.model.JSwitchConfig;
 import com.tejchen.switchclient.annotation.JSwitch;
-import com.tejchen.switchclient.annotation.JSwitchNamespace;
 import com.tejchen.switchcommon.JSwitchException;
-import com.tejchen.switchcommon.helper.SerializeHelper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -28,14 +26,13 @@ public class AnnotationHelper {
         if (aClass == null){
             return resultList;
         }
-        JSwitchNamespace namespace = (JSwitchNamespace) aClass.getDeclaredAnnotation(JSwitchNamespace.class);
         Field[] fields = aClass.getFields();
         for (Field field : fields) {
             JSwitch jswitch = field.getDeclaredAnnotation(JSwitch.class);
             if (jswitch == null) {
                 continue;
             }
-            JSwitchConfig config = new JSwitchConfig(appName, namespace, jswitch, field);
+            JSwitchConfig config = new JSwitchConfig(appName, jswitch, field);
             resultList.add(config);
         }
         return resultList;

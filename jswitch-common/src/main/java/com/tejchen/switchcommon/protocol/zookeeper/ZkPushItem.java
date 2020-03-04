@@ -15,7 +15,10 @@ public class ZkPushItem {
     private String type;
 
     @NotNull
-    private String configKey;
+    private String configCode;
+
+    @NotNull
+    private String configName;
 
     @NotNull
     private String defaultValue;

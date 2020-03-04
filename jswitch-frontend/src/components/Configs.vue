@@ -36,8 +36,8 @@
             </template>
             <template slot-scope="{ row, index }" slot="action">
               <div style="margin: 0 auto">
-                <Button type="info" ghost size="small" style="margin-right: 7px; padding: 3px">详情</Button>
-                <Button ghost type="error" size="small" style="padding: 3px">推送</Button>
+                <Button type="info" ghost size="small" style="margin-right: 7px; padding: 3px" @click="mode = 'detail';editView = true; tableAction('detail', index)">详情</Button>
+                <Button ghost type="error" size="small" style="padding: 3px" @click="mode = 'push';editView = true; tableAction('push', index)">推送</Button>
               </div>
             </template>
           </Table>
@@ -64,16 +64,16 @@
         <Row :gutter="32">
           <Col span="12">
             <FormItem label="配置编码" label-position="top">
-              <Input v-model="createFormData.appConfigCode" placeholder="配置编码" >
+              <i-input v-model="createFormData.appConfigCode" placeholder="配置编码">
                 <slot slot="prefix"/>
-              </Input>
+              </i-input>
             </FormItem>
           </Col>
         </Row>
         <Row :gutter="32">
           <Col span="12">
             <FormItem label="配置名称" label-position="top">
-              <Input v-model="createFormData.appConfigName" placeholder="配置名称" />
+              <Input v-model="createFormData.appConfigName" placeholder="配置名称"/>
             </FormItem>
           </Col>
         </Row>
@@ -89,10 +89,124 @@
         <Button type="primary" @click="createConfig">创建</Button>
       </div>
     </Drawer>
+
+
+    <!-- 详情/推送窗口-->
+    <Drawer
+      title="配置详情"
+      v-model="editView"
+      width="720"
+      :mask-closable="true"
+      :styles="styles"
+      @on-close="closeEditView"
+    >
+      <Form :model="editFormData">
+        <Row :gutter="32">
+          <Col span="12">
+            <FormItem label="应用编码" label-position="top">
+              <i-input v-model="editFormData.appCode" placeholder="应用编码" :disabled="mode == 'push' || mode == 'detail'">
+                <slot slot="prefix"/>
+              </i-input>
+            </FormItem>
+          </Col>
+          <Col span="12">
+            <FormItem label="应用名称" label-position="top">
+              <i-input v-model="editFormData.appName" placeholder="应用名称" :disabled="mode == 'push' || mode == 'detail'">
+                <slot slot="prefix"/>
+              </i-input>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row :gutter="32">
+          <Col span="12">
+            <FormItem label="配置编码" label-position="top">
+              <Input v-model="editFormData.appConfigCode" placeholder="配置名称" :disabled="mode == 'push' || mode == 'detail'"/>
+            </FormItem>
+          </Col>
+          <Col span="12">
+            <FormItem label="配置名称" label-position="top">
+              <Input v-model="editFormData.appConfigName" placeholder="配置名称" :disabled="mode == 'push'"/>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row :gutter="32">
+          <Col span="12">
+            <FormItem label="配置来源" label-position="top">
+              <Input v-model="editFormData.appConfigSource" placeholder="配置来源" :disabled="mode == 'push' || mode == 'detail'"/>
+            </FormItem>
+          </Col>
+          <Col span="12">
+            <FormItem label="配置类型" label-position="top">
+              <Input v-model="editFormData.appConfigType" placeholder="配置类型" :disabled="mode == 'push' || mode == 'detail'"/>
+            </FormItem>
+          </Col>
+        </Row>
+        <FormItem label="在线机器" label-position="top">
+          <br/>
+          <Tag v-for="item in editFormData.appNodes" :key="item" :name="item" type="dot" color="success">{{ item }}</Tag>
+        </FormItem>
+        <FormItem label="配置内容" label-position="top">
+          <Input type="textarea" v-model="editFormData.appConfigContent" :rows="6" placeholder="配置内容" :disabled="mode == 'detail'"/>
+        </FormItem>
+        <FormItem label="配置描述" label-position="top">
+          <Input type="textarea" v-model="editFormData.appConfigDesc" :rows="4" placeholder="配置描述" :disabled="mode == 'push'"/>
+        </FormItem>
+      </Form>
+      <div class="demo-drawer-footer">
+        <Button style="margin-right: 8px" @click="editView = false">取消</Button>
+        <Button type="primary" @click="updateConfig" :style="{display: detailViewButton}">修改</Button>
+        <Button type="primary" @click="pushConfig" :style="{display: pushViewButton}">推送</Button>
+      </div>
+    </Drawer>
+
+    <Modal
+      title="推送任务"
+      v-model="pushingWindow"
+      cancel-text="取消（后台执行）"
+      ok-text="确定"
+      :mask-closable="false"
+      class-name="vertical-center-modal">
+		  <div v-for="node in nodes">
+        <Spin size="small" :style="{display: node.status == 1 ? 'inline-block' : 'none'}">
+          <Icon style="color: #ff9900" type="ios-loading" size=15 class="loading-spin-icon-load"></Icon>
+          <div style="display: inline-block; color: #ff9900">正在推送</div>
+        </Spin>
+        <Spin size="small" :style="{display: node.status == 2 ? 'inline-block' : 'none'}">
+          <Icon style="color: #19be6b" type="md-checkmark-circle-outline" size=15 class="success-spin-icon-load"></Icon>
+          <div style="display: inline-block; color: #19be6b">推送成功</div>
+        </Spin>
+        <Spin size="small" :style="{display: node.status == 3 ? 'inline-block' : 'none'}">
+          <Icon style="color: #ed4014" type="md-close-circle" size=15 class="fail-spin-icon-load"></Icon>
+          <div style="display: inline-block; color: #ed4014">推送失败</div>
+        </Spin>
+        <div style="display: inline-block;vertical-align: middle;font-weight: 400" >
+          机器 IP: {{ node.ip }}
+        </div>
+		  </div>
+    </Modal>
   </div>
 </template>
 
 <style>
+  .loading-spin-icon-load{
+    animation: ani-loading-spin 1s linear infinite;
+  }
+  @keyframes ani-loading-spin {
+    from { transform: rotate(0deg);}
+    50%  { transform: rotate(180deg);}
+    to   { transform: rotate(360deg);}
+  }
+  .success-spin-icon-load{
+    /*animation: ani-loading-spin 1s linear infinite;*/
+  }
+  .fail-spin-icon-load{
+    /*animation: ani-loading-spin 1s linear infinite;*/
+  }
+  .demo-spin-col{
+    height: 100px;
+    position: relative;
+    border: 1px solid #eee;
+  }
   .create-button{
     color: #2d8cf0;
     margin-top: 15px;
@@ -122,6 +236,10 @@
   /*.ivu-layout-sider-children .ivu-table-wrapper{*/
   /*  flex: 1;*/
   /*}*/
+  .ivu-input[disabled] {
+    cursor: default;
+    color: #666;
+  }
 </style>
 
 <script>
@@ -129,6 +247,7 @@
     name: "Apps",
     data () {
       return {
+        pushingWindow: false,
         split1: 0.15,
         configKeyword: "",
         tableLoading: false,
@@ -139,9 +258,6 @@
           {
             title: '应用编码',
             key: 'appCode'
-          },{
-            title: '应用名称',
-            key: 'appName'
           },{
             title: '配置编码',
             key: 'appConfigCode'
@@ -176,7 +292,7 @@
         searchData: [],
         // 创建窗口
         createView: false,
-        createDefaultOwner: 'admin',
+        editView: false,
         styles: {
           height: 'calc(100% - 55px)',
           overflow: 'auto',
@@ -194,7 +310,44 @@
           appConfigName: '',
           appConfigDesc: '',
           appConfigContent: '',
-        }
+        },
+        mode: 'detail',
+        edited: false,
+        emptyEditFormData: {
+          appCode: '',
+          appName: '',
+          appConfigCode: '',
+          appConfigName: '',
+          appConfigType: '',
+          appConfigDesc: '',
+          appConfigSource: '',
+          appNodes: [],
+          appConfigContent: '',
+          appConfigContentSource: '',
+        },
+        editFormData: {
+          appCode: '',
+          appName: '',
+          appConfigCode: '',
+          appConfigName: '',
+          appConfigType: '',
+          appConfigDesc: '',
+          appConfigSource: '',
+          appNodes: [],
+          appConfigContent: '',
+          appConfigContentSource: '',
+        },
+        pushViewButton : 'none',
+        detailViewButton: 'none',
+        nodes: [{
+          'ip': '127.0.0.1',
+          'status': 1,
+          'token': '45678'
+        },{
+          'ip': '127.0.0.2',
+          'status': 2,
+          'token': '45678'
+        }],
       }
     },
     mounted (){
@@ -242,6 +395,94 @@
           _this.loadTable(_this.configKeyword, _this.currentPage, _this.pageSize)
         })
       },
+      pushConfig: function() {
+        // 比较数据变动
+        if (this.editFormData.appConfigContentSource === this.editFormData.appConfigContent) {
+          this.$Notice.warning({
+            title: '操作提醒',
+            desc:  '配置未变更'
+          })
+          return
+        }
+        let config = JSON.parse(JSON.stringify(this.editFormData))
+        let _this = this
+        _this.$network.post('/jswitch/app/config/push', config, function (data) {
+          if (data.length == 0) {
+            _this.$Notice.success({
+              title: '操作提醒',
+              desc:  '修改成功，目前该应用没有在线机器'
+            })
+          }else{
+            _this.$Notice.success({
+              title: '操作提醒',
+              desc:  '提交推送任务成功'
+            })
+            // 展示推送任务
+            var appNodeTokens = []
+            let appVersion = data.appVersion
+            let appCode = data.appCode
+            _this.nodes = []
+            for (var node of data.appNodes){
+              _this.nodes.push({
+                'ip': node.appNodeIp,
+                'token': node.appNodeToken,
+                'status': 1,
+              })
+              appNodeTokens.push(node.appNodeToken)
+            }
+            console.log(appNodeTokens)
+            // 启动默认轮训
+            _this.timer = setInterval(function () {
+              let params = {
+                appCode: appCode,
+                appVersion: appVersion,
+                appNodeTokens: appNodeTokens,
+              }
+              _this.$network.post('/jswitch/app/config/pushResult', params, function (data) {
+                for(var token in data){
+                  for(var node of _this.nodes){
+                    // 更新该节点数据
+                    if (token === node.token){
+                      node.status = data[token] === 'success' ? 2 : (data[token] === 'fail' ? 3 : 1)
+                    }
+                  }
+                }
+                // 如果全部节点结束，则取消该定时器
+                var flag = true
+                for(var node of _this.nodes){
+                  if (node.status == 1){
+                    flag = false
+                  }
+                }
+                if (flag) {
+                  clearInterval(_this.timer)
+                }
+              })
+            }, 1000)
+            _this.pushingWindow = true
+          }
+          _this.edited = true
+        })
+      },
+      updateConfig: function() {
+        let config = JSON.parse(JSON.stringify(thiss.editFormData))
+        let _this = this
+        _this.$network.post('/jswitch/app/config/update', config, function (data) {
+          _this.$Notice.success({
+            title: '操作提醒',
+            desc:  '更新成功'
+          })
+          _this.edited = true
+        })
+      },
+      closeEditView: function() {
+        this.editFormData =  JSON.parse(JSON.stringify(this.emptyEditFormData))
+        if(this.edited) {
+          this.loadTable(this.keyword, this.currentPage, this.pageSize)
+        }
+        this.edited = false
+        clearInterval(this.timer)
+      },
       appChange: function(currentRow){
         this.selectedAppCode = currentRow.appCode
         this.loadTable(this.configKeyword, 0, this.pageSize)
@@ -254,6 +495,50 @@
       },
       pageChange: function (page) {
         this.loadTable(this.configKeyword, page, this.pageSize)
+      },
+      tableAction: function (action, index) {
+        if (action == 'push') {
+          this.pushViewButton = 'inline-block'
+          this.detailViewButton = 'none'
+          this.editFormData.appConfigCode = this.data[index].appConfigCode
+        }
+        if (action == 'detail') {
+          this.detailViewButton = 'inline-block'
+          this.pushViewButton = 'none'
+          this.editFormData.appConfigCode = this.data[index].appConfigCode
+        }
+        // 加载数据
+        let appCode = this.selectedAppCode
+        let appConfigCode = this.editFormData.appConfigCode
+        let form = {};
+        form.params = {
+          'appCode': appCode,
+        }
+        let uri = '/jswitch/app/config/detail/'+appConfigCode
+        let _this = this
+        _this.$network.get(uri, form, function (data) {
+          if (data == null){
+            return
+          }
+          _this.editFormData.appCode = data.appCode
+          _this.editFormData.appName = data.appName
+          _this.editFormData.appConfigCode = data.appConfigCode
+          _this.editFormData.appConfigName = data.appConfigName
+          _this.editFormData.appConfigType = data.appConfigType
+          _this.editFormData.appConfigDesc = data.appConfigDesc
+          _this.editFormData.appConfigSource = data.appConfigSource
+          _this.editFormData.appConfigContent = data.appConfigContent
+          _this.editFormData.appConfigContentSource = data.appConfigContent
+          // 生成ip地址
+          if (data.appNodes.length === 0){
+            _this.editFormData.appNodes.push("暂无在线机器")
+          }else{
+            for(let node of data.appNodes){
+              _this.editFormData.appNodes.push("IP: " + node)
+            }
+          }
+
+        })
       },
       loadSearchTable: function (keyword, page, pageSize) {
         let config = {};

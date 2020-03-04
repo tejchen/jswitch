@@ -2,6 +2,7 @@ package com.tejchen.switchclient.remote.listener;
 
 import com.tejchen.switchclient.model.JSwitchConfig;
 import com.tejchen.switchclient.remote.JSwitchListener;
+import com.tejchen.switchcommon.JSwitchException;
 import lombok.Getter;
 
 public class DefaultJSwitchListener implements JSwitchListener {
@@ -21,11 +22,11 @@ public class DefaultJSwitchListener implements JSwitchListener {
 
     @Override
     public String listenKey() {
-        return JSwitchConfig.getConfigKey();
+        return JSwitchConfig.getConfigCode();
     }
 
     @Override
-    public boolean onChange(String newConfigText) {
+    public boolean onChange(String newConfigText) throws JSwitchException {
         if (!newConfigText.equals(JSwitchConfig.getConfigValue())) {
             JSwitchConfig.updateConfig(newConfigText);
             return true;

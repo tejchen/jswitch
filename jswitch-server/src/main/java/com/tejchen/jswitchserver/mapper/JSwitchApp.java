@@ -22,6 +22,12 @@ public class JSwitchApp {
 
     private String appOwner;
 
+    private Long appVersion;
+
+    private String appSignKey;
+
+    private String appSignFlag;
+
     private String gmtCreate;
 
     private String gmtModified;

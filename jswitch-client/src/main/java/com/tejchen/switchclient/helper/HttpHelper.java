@@ -1,6 +1,7 @@
 package com.tejchen.switchclient.helper;
 
 import com.tejchen.switchcommon.helper.SerializeHelper;
+import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponse;
 import lombok.Cleanup;
 import lombok.extern.java.Log;
 import org.apache.http.client.HttpClient;
@@ -27,7 +28,7 @@ public class HttpHelper {
         return result;
     }
 
-    public static String PostBody(HttpClient client, String url, Object form) {
+    public static String postBody(HttpClient client, String url, Object form) {
         HttpPost post = new HttpPost(url);
         post.setHeader("Content-Type", "application/json;charset=UTF-8");
         if (form != null) {
@@ -41,11 +42,14 @@ public class HttpHelper {
     private static String execute(HttpClient client, HttpUriRequest request){
         try {
             @Cleanup CloseableHttpResponse response = (CloseableHttpResponse) client.execute(request);
+            String responseStr = null;
+            if (response.getEntity() != null && response.getEntity().getContent() != null){
+                responseStr = readerLines(response.getEntity().getContent()).reduce(String::concat).get();
+            }
             if (response.getStatusLine().getStatusCode() == 200) {
-                if (response.getEntity() != null && response.getEntity().getContent() != null){
-                    String result = readerLines(response.getEntity().getContent()).reduce(String::concat).get();
-                    return result;
-                }
+                return responseStr;
+            }else {
+                logger.error("http connect err! {}", responseStr);
             }
         } catch (IOException e){
             logger.error("http connect err!", e);

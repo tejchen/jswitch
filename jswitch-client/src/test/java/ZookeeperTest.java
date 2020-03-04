@@ -27,6 +27,5 @@ public class ZookeeperTest {
         client.start();
         client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath("/com/tejchen/jswitch/switch/abc_BaseServiceTestConfig#testBigDecimal", "9.1".getBytes(StandardCharsets.UTF_8));
         Thread.sleep(3000);
-        System.out.println(BaseServiceTestConfig.testBigDecimal);
     }
 }

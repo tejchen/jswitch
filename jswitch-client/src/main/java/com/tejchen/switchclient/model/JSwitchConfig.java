@@ -1,7 +1,6 @@
 package com.tejchen.switchclient.model;
 
 import com.tejchen.switchclient.annotation.JSwitch;
-import com.tejchen.switchclient.annotation.JSwitchNamespace;
 import com.tejchen.switchcommon.JSwitchException;
 import com.tejchen.switchcommon.helper.SerializeHelper;
 import lombok.Getter;
@@ -20,8 +19,10 @@ public class JSwitchConfig {
 
     // 应用名称
     private String      configApp;
-    // 配置项 key
-    private String      configKey;
+    // 配置项 编码
+    private String      configCode;
+    // 配置项 名称
+    private String      configName;
     // 配置描述
     private String      configDesc;
     // 配置来源
@@ -33,12 +34,10 @@ public class JSwitchConfig {
     // 默认值
     private String      configDefaultValue;
 
-    public JSwitchConfig(String appName, JSwitchNamespace namespace, JSwitch jswitch, Field configItem){
+    public JSwitchConfig(String appName, JSwitch jswitch, Field configItem){
         this.configApp = appName;
-        this.configKey = configItem.getDeclaringClass().getSimpleName() + "#" + configItem.getName();
-        if (namespace != null){
-            this.configKey = String.format("%s_%s", namespace.value(), this.configKey);
-        }
+        this.configCode = jswitch.code();
+        this.configName = jswitch.name();
         this.configDesc = jswitch.desc();
         this.configOrigin = configItem.getDeclaringClass();
         this.configItem = configItem;
@@ -61,9 +60,8 @@ public class JSwitchConfig {
             }
             configItem.set(configOrigin, SerializeHelper.deserialize(configItem.getType(), configValue));
         } catch (Exception e) {
-            e.printStackTrace();
-            // todo 打印日志
-            // todo 响应异常
+            logger.error("update config error! expect: {}, but config is: {}", configOrigin.getName(), configValue, e);
+            throw new JSwitchException("unSupport config!");
         }
     }
 }

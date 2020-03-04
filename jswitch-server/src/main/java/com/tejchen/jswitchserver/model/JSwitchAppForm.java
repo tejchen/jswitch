@@ -17,6 +17,8 @@ public class JSwitchAppForm {
     @NotEmpty
     private String appName;
 
+    private boolean appCheckSign;
+
     private String appDesc;
 
     private String appOwner;

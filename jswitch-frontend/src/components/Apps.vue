@@ -25,8 +25,8 @@
         </template>
         <template slot-scope="{ row, index }" slot="action">
           <div style="margin: 0 auto">
-            <Button type="info" ghost size="small" style="margin-right: 7px; padding: 3px">详情</Button>
-            <Button ghost type="error" size="small" style="padding: 3px">修改</Button>
+            <Button type="info" ghost size="small" style="margin-right: 7px; padding: 3px">查看配置</Button>
+            <Button ghost type="error" size="small" style="padding: 3px" @click="editView = true; tableAction(index)">修改</Button>
           </div>
         </template>
       </Table>
@@ -44,9 +44,10 @@
     <Drawer
       title="创建应用"
       v-model="createView"
-      width="720"
+      width="600"
       :mask-closable="true"
       :styles="styles"
+      @on-close="closeCreateView"
     >
       <Form :model="createFormData">
         <Row :gutter="32">
@@ -57,6 +58,14 @@
               </Input>
             </FormItem>
           </Col>
+          <Col span="12">
+            <FormItem label="签名校验" label-position="top" >
+              <br>
+              <i-switch v-model="createFormData.appCheckSign">
+
+              </i-switch>
+            </FormItem>
+          </Col>
         </Row>
         <Row :gutter="32">
           <Col span="12">
@@ -64,6 +73,13 @@
               <Input v-model="createFormData.appName" placeholder="应用名称" />
             </FormItem>
           </Col>
+          <Col span="12">
+            <FormItem label="应用版本" label-position="top" >
+              <Input v-model="createFormData.appVersion" placeholder="应用创建完成后,自动生成" :disabled="true"/>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row :gutter="32">
           <Col span="12">
             <FormItem label="应用负责人" label-position="top">
               <Select v-model="createFormData.appOwner" placeholder="应用负责人">
@@ -73,14 +89,92 @@
               </Select>
             </FormItem>
           </Col>
+          <Col span="12">
+            <FormItem label="应用秘钥" label-position="top" >
+              <Input v-model="createFormData.appSignKey" placeholder="应用创建完成后,自动生成" :disabled="true"/>
+            </FormItem>
+          </Col>
         </Row>
-        <FormItem label="应用描述" label-position="top">
-          <Input type="textarea" v-model="createFormData.appDesc" :rows="4" placeholder="应用描述" />
-        </FormItem>
+        <Row :gutter="32">
+          <Col span="24">
+            <FormItem label="应用描述" label-position="top">
+              <Input type="textarea" v-model="createFormData.appDesc" :rows="4" placeholder="应用描述" />
+            </FormItem>
+          </Col>
+        </Row>
       </Form>
       <div class="demo-drawer-footer">
         <Button style="margin-right: 8px" @click="createView = false">取消</Button>
         <Button type="primary" @click="createApp">创建</Button>
+      </div>
+    </Drawer>
+
+    <!-- 创建窗口 -->
+    <Drawer
+      title="应用详情"
+      v-model="editView"
+      width="600"
+      :mask-closable="true"
+      :styles="styles"
+      @on-close="closeEditView"
+    >
+      <Form :model="editFormData">
+        <Row :gutter="32">
+          <Col span="12">
+            <FormItem label="应用编码" label-position="top">
+              <Input v-model="editFormData.appCode" placeholder="应用编码" :disabled="1 == 1">
+                <slot slot="prefix"/>
+              </Input>
+            </FormItem>
+          </Col>
+          <Col span="12">
+            <FormItem label="签名校验" label-position="top" >
+              <br>
+              <i-switch v-model="editFormData.appCheckSign">
+
+              </i-switch>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row :gutter="32">
+          <Col span="12">
+            <FormItem label="应用名称" label-position="top">
+              <Input v-model="editFormData.appName" placeholder="应用名称" />
+            </FormItem>
+          </Col>
+          <Col span="12">
+            <FormItem label="应用版本" label-position="top" >
+              <Input v-model="editFormData.appVersion" placeholder="应用创建完成后,自动生成" :disabled="true"/>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row :gutter="32">
+          <Col span="12">
+            <FormItem label="应用负责人" label-position="top">
+              <Select v-model="editFormData.appOwner" placeholder="应用负责人">
+                <Option value="admin">admin</Option>
+                <Option value="tejchen">tejchen</Option>
+                <Option value="qx">qx</Option>
+              </Select>
+            </FormItem>
+          </Col>
+          <Col span="12">
+            <FormItem label="应用秘钥" label-position="top" >
+              <Input v-model="editFormData.appSignKey" placeholder="应用创建完成后,自动生成" :disabled="true"/>
+            </FormItem>
+          </Col>
+        </Row>
+        <Row :gutter="32">
+          <Col span="24">
+            <FormItem label="应用描述" label-position="top">
+              <Input type="textarea" v-model="editFormData.appDesc" :rows="4" placeholder="应用描述" />
+            </FormItem>
+          </Col>
+        </Row>
+      </Form>
+      <div class="demo-drawer-footer">
+        <Button style="margin-right: 8px" @click="editView = false">取消</Button>
+        <Button type="primary" @click="editApp">更新</Button>
       </div>
     </Drawer>
   </div>
@@ -104,6 +198,10 @@
     text-align: right;
     background: #fff;
   }
+  .ivu-input[disabled] {
+    cursor: default;
+    color: #666;
+  }
 </style>
 
 <script>
@@ -114,7 +212,7 @@
         keyword: "",
         tableLoading: false,
         pageTotal: 0,
-        pageSize: 15,
+        pageSize: 12,
         currentPage: 1,
         columns: [
           {
@@ -131,7 +229,7 @@
           },
           {
             title: '在线机器',
-            key: 'onlineMachine'
+            key: 'onlineMachineCount'
           },
           {
             title: '创建时间',
@@ -145,6 +243,7 @@
         data: [],
         // 创建窗口
         createView: false,
+        created: false,
         createDefaultOwner: 'admin',
         styles: {
           height: 'calc(100% - 55px)',
@@ -156,12 +255,39 @@
           appCode: '',
           appName: '',
           appDesc: '',
+          appSignKey: '',
+          appVersion: '',
+          appCheckSign: false,
           appOwner: 'admin',
         },
         createFormData: {
           appCode: '',
           appName: '',
           appDesc: '',
+          appSignKey: '',
+          appVersion: '',
+          appCheckSign: false,
+          appOwner: 'admin',
+        },
+        // 编辑窗口
+        editView: false,
+        edited: false,
+        emptyEditFormData: {
+          appCode: '',
+          appName: '',
+          appDesc: '',
+          appSignKey: '',
+          appVersion: '',
+          appCheckSign: false,
+          appOwner: 'admin',
+        },
+        editFormData: {
+          appCode: '',
+          appName: '',
+          appDesc: '',
+          appSignKey: '',
+          appVersion: '',
+          appCheckSign: false,
           appOwner: 'admin',
         },
       }
@@ -185,22 +311,73 @@
           });
           return
         }
-        if (this.createFormData.appOwner === ''){
-          this.$Notice.warning({
-            title: '必填提醒',
-            desc:  '应用负责人不能为空'
-          });
-          return
-        }
         let _this = this
         _this.$network.post('/jswitch/app/save', this.createFormData, function (data) {
           _this.$Notice.success({
             title: '操作提醒',
             desc:  '创建成功'
           })
-          _this.createView = false
-          _this.createFormData =  JSON.parse(JSON.stringify(_this.emptyCreateFormData))
-          _this.loadTable(_this.keyword, _this.currentPage, _this.pageSize)
+          _this.createFormData.appSignKey = data.appSignKey
+          _this.createFormData.appVersion = 'V ' + data.appVersion
+          _this.created = true
+        })
+      },
+      editApp: function(){
+        if (this.editFormData.appCode === ''){
+          this.$Notice.warning({
+            title: '必填提醒',
+            desc:  '应用编码不能为空'
+          });
+          return
+        }
+        if (this.editFormData.appName === ''){
+          this.$Notice.warning({
+            title: '必填提醒',
+            desc:  '应用名称不能为空'
+          });
+          return
+        }
+        let _this = this
+        _this.$network.post('/jswitch/app/update', this.editFormData, function (data) {
+          _this.$Notice.success({
+            title: '操作提醒',
+            desc:  '更新成功'
+          })
+          _this.edited = true
+        })
+      },
+      closeCreateView: function () {
+        this.createFormData =  JSON.parse(JSON.stringify(this.emptyCreateFormData))
+        if (this.created) {
+          this.loadTable(this.keyword, this.currentPage, this.pageSize)
+        }
+        this.created = false
+      },
+      closeEditView: function () {
+        this.editFormData =  JSON.parse(JSON.stringify(this.emptyEditFormData))
+        if (this.edited) {
+          this.loadTable(this.keyword, this.currentPage, this.pageSize)
+        }
+        this.edited = false
+      },
+      tableAction: function(index) {
+        let appCode = this.data[index].appCode
+        let form = {};
+        let uri = '/jswitch/app/detail/'+appCode
+        let _this = this
+        _this.$network.get(uri, form, function (data) {
+          if (data == null){
+            return
+          }
+          console.log(data)
+          _this.editFormData.appCode = data.appCode
+          _this.editFormData.appName = data.appName
+          _this.editFormData.appConfigDesc = data.appConfigDesc == '' ? '暂无描述' : data.appConfigDesc
+          _this.editFormData.appNodes = data.appNodes
+          _this.editFormData.appCheckSign = data.appCheckSign
+          _this.editFormData.appSignKey = data.appSignKey
+          _this.editFormData.appDesc = data.appDesc
+          _this.editFormData.appVersion = "V " + data.appVersion
         })
       },
       searchApps: function () {
@@ -232,7 +409,7 @@
                 'appCode': item['appCode'],
                 'appName': item['appName'],
                 'appOwner': item['appOwner'],
-                'onlineMachine': item['onlineMachine'],
+                'onlineMachineCount': item['onlineMachineCount'] + ' 台',
                 'createTime': item['gmtCreate'],
               })
             }

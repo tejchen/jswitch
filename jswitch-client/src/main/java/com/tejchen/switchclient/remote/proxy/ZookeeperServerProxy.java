@@ -26,7 +26,7 @@ public class ZookeeperServerProxy implements JSwitchServerProxy {
     private Map<String, JSwitchListener> listenerMap = new HashMap<>();
 
     @Override
-    public boolean connect(String appName, String server) {
+    public boolean connect(String appCode, String server) {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         client = CuratorFrameworkFactory.newClient(server, retryPolicy);
         client.start();
@@ -34,12 +34,12 @@ public class ZookeeperServerProxy implements JSwitchServerProxy {
     }
 
     @Override
-    public Map<String, String> pull(String appName, List<String> keys) {
-        requiredArgument(appName, keys);
+    public Map<String, String> pull(String appCode, List<String> keys) {
+        requiredArgument(appCode, keys);
 
         Map<String, String> keyValue = new HashMap<>();
         keys.forEach(key -> {
-            String path = getPath(appName,key);
+            String path = getPath(appCode,key);
             // 重试一次
             try {
                 collectForPath(path, key, keyValue);
@@ -65,15 +65,16 @@ public class ZookeeperServerProxy implements JSwitchServerProxy {
     }
 
     @Override
-    public boolean push(String appName, List<JSwitchPushItem> items) {
-        requiredArgument(appName, items);
+    public boolean push(String appCode, List<JSwitchPushItem> items) {
+        requiredArgument(appCode, items);
         // 初始化协议参数
         ZkPushProtocol protocol = new ZkPushProtocol();
-        protocol.setAppName(appName);
+        protocol.setAppName(appCode);
         for (JSwitchPushItem item : items) {
             protocol.getPushConfig().add(new ZkPushItem(){{
                 setType(item.getType());
-                setConfigKey(item.getConfigKey());
+                setConfigCode(item.getConfigCode());
+                setConfigName(item.getConfigName());
                 setDefaultValue(item.getDefaultValue());
             }});
         }
@@ -126,11 +127,11 @@ public class ZookeeperServerProxy implements JSwitchServerProxy {
         return ZookeeperPathHelper.getConfigPath(nodes);
     }
 
-    private void requiredArgument(String appName, Collection collection){
+    private void requiredArgument(String appCode, Collection collection){
         if (client == null) {
             throw new JSwitchException("zookeeper client not connect!");
         }
-        if (appName == null || collection == null || collection.isEmpty()) {
+        if (appCode == null || collection == null || collection.isEmpty()) {
             throw new JSwitchException("argument required!");
         }
     }

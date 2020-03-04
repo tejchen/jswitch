@@ -17,13 +17,13 @@ public class WebExceptionHandler {
     @ExceptionHandler({ServerBizException.class})
     public @ResponseBody Object biz(ServerBizException bex){
         logger.warn("biz exception!", bex);
-        return ResponseHelper.with(bex.getBizResult());
+        return ResponseHelper.with(bex.getBizResult(), bex.getMessage());
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public @ResponseBody Object biz(MethodArgumentNotValidException vex){
         logger.warn("argument exception!", vex);
-        return ResponseHelper.with(BizResult.FAIL, BizResult.FAIL.getCode()+":必填参数不能为空");
+        return ResponseHelper.with(BizResult.FAIL, BizResult.FAIL.getCode()+":参数校验不通过");
     }
 
     @ExceptionHandler({Exception.class})

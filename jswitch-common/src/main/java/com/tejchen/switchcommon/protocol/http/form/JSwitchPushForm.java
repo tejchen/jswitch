@@ -10,13 +10,14 @@ import java.util.List;
 
 @Setter
 @Getter
-public class JSwitchPushForm {
-
-    @NotNull
-    private String appName;
+public class JSwitchPushForm extends JSwitchBaseForm{
 
     @Valid
     @NotEmpty
     private List<JSwitchPushItem> pushConfig;
 
+    @Override
+    public String getSignValue() {
+        return null;
+    }
 }

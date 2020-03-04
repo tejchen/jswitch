@@ -10,11 +10,12 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class JSwitchBatchPullItem {
+public class JSwitchHeartbeat {
 
-    private String key;
+    private String appVersion;
 
-    private String value;
+    private String appNodeVersion;
+
 }
 
 
