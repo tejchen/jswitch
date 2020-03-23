@@ -9,7 +9,7 @@ import com.tejchen.switchclient.remote.JSwitchEventCollector;
 import com.tejchen.switchclient.remote.JSwitchListener;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import com.tejchen.switchcommon.JSwitchException;
-import com.tejchen.switchcommon.event.JSwitchEvent;
+import com.tejchen.switchcommon.event.JSwitchClientEvent;
 import com.tejchen.switchcommon.event.JSwitchEventWrapper;
 import com.tejchen.switchcommon.helper.EventHelper;
 import com.tejchen.switchcommon.helper.HttpPathHelper;
@@ -158,14 +158,14 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
                         }
                         baseVersion = version;
                     }catch (Exception e){
-                        JSwitchEventWrapper event = EventHelper.unacceptedPush(appCode, version);
+                        JSwitchEventWrapper event = EventHelper.unacceptedPush(appCode, version, e.getMessage());
                         logger.error("update config err! report an event... {}", event, e);
-                        collector.collect(JSwitchEvent.ACCEPT_ACK, event);
-                    }finally {
-                        JSwitchEventWrapper event = EventHelper.acceptedPush(appCode, version);
-                        logger.info("update config success! report an event... {}", event);
-                        collector.collect(JSwitchEvent.ACCEPT_ACK, event);
+                        collector.collect(JSwitchClientEvent.ACCEPT_ACK, event);
+                        return;
                     }
+                    JSwitchEventWrapper event = EventHelper.acceptedPush(appCode, version);
+                    logger.info("update config success! report an event... {}", event);
+                    collector.collect(JSwitchClientEvent.ACCEPT_ACK, event);
                 }
             }catch (Exception e){
                 logger.warn("heartbeat err!", e);
@@ -178,10 +178,10 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
     // todo 目前只有单线程，后续可以拓展成线程安全
     class DefaultJSwitchEventCollector implements JSwitchEventCollector {
 
-        private Multimap<JSwitchEvent, JSwitchEventWrapper> multimap = ArrayListMultimap.create();
+        private Multimap<JSwitchClientEvent, JSwitchEventWrapper> multimap = ArrayListMultimap.create();
 
         @Override
-        public boolean collect(JSwitchEvent event, JSwitchEventWrapper data) {
+        public boolean collect(JSwitchClientEvent event, JSwitchEventWrapper data) {
             multimap.put(event, data);
             return flush();
         }
@@ -210,12 +210,13 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
             if (multimap.isEmpty()){
                 return null;
             }
-            JSwitchEvent event = Lists.newArrayList(multimap.keySet()).get(0);
+            JSwitchClientEvent event = Lists.newArrayList(multimap.keySet()).get(0);
             JSwitchEventWrapper wrapper = Lists.newArrayList(multimap.get(event)).get(0);
             JSwitchEventForm data = new JSwitchEventForm();
             data.setToken(NodeHelper.generateToken());
             data.setEventCode(event.getCode());
             data.setEventSn(wrapper.getEventSn());
+            data.setEvenLevel(wrapper.getEventLevel());
             data.setEventData(SerializeHelper.serializeJson(wrapper.getEventData()));
             return data;
         }

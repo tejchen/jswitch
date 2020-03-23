@@ -1,4 +1,4 @@
-package com.tejchen.jswitchserver.web;
+package com.tejchen.jswitchserver.web.enhancer;
 
 import com.tejchen.jswitchserver.base.BizResult;
 import com.tejchen.jswitchserver.base.ServerBizException;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @ControllerAdvice
-public class WebExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(WebExceptionHandler.class);
+public class WebExceptionAspect {
+    private static final Logger logger = LoggerFactory.getLogger(WebExceptionAspect.class);
 
     @ExceptionHandler({ServerBizException.class})
     public @ResponseBody Object biz(ServerBizException bex){

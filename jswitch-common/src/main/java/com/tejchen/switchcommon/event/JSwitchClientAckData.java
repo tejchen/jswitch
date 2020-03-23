@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class JSwitchEventAckData extends JSwitchEventData {
+public class JSwitchClientAckData extends JSwitchEventData {
 
     /**
      * ack 场景编码
@@ -15,8 +15,13 @@ public class JSwitchEventAckData extends JSwitchEventData {
     private String code;
 
     /**
-     * ack 对应的标示
+     * ack 标示
      */
     private String flag;
+
+    /**
+     * ack 消息
+     */
+    private String message;
 
 }

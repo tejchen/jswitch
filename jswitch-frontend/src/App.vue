@@ -26,11 +26,11 @@
           </div>
         </Menu>
       </Header>
-      <Layout>
+      <Layout class="left-menu">
         <Sider hide-trigger :style="{background: '#fff'}">
-          <Menu :active-name="$route.path" ref="leftMenu" theme="light" width="auto" :style="{height:'100%'}">
+          <Menu :active-name="$route.path" ref="leftMenu" theme="light" width="auto" :style="{height:'100%', fontSize: '16px'}">
             <MenuItem name="/home" to="/home">
-              <Icon type="ios-home" />
+              <Icon type="ios-home" style="position: relative; top: -0.5px;"/>
               首页
             </MenuItem>
             <MenuItem name="/apps" to="/apps">
@@ -48,7 +48,7 @@
           </Menu>
         </Sider>
         <Layout :style="{padding: '8px'}">
-          <Content :style="{padding: '24px', minHeight: '280px', background: '#fff'}">
+          <Content collapsible="true" :style="{padding: '24px', background: '#fff'}">
             <router-view></router-view>
           </Content>
         </Layout>
@@ -69,6 +69,9 @@
         console.log(to)
         console.log(from)
       }
+    },
+    methods: {
+      
     }
   }
 </script>
@@ -79,6 +82,10 @@
   }
   body{
     height: 100%;
+  }
+  .left-menu .ivu-menu-item {
+    font-size: 14px;
+    font-weight: 420;
   }
   .ivu-layout{
     height: 100%;
@@ -124,5 +131,22 @@
   .layout-nav{
     float: right;
     width: auto;
+  }
+  .icon-top-1{
+    position: relative;
+    top: -1px;
+  }
+  .heart_icon{
+    cursor: pointer;
+    position: relative;
+    top:  -1px;
+    margin-right: 5px;
+  }
+  .heart_icon_favorite{
+    cursor: pointer;
+    position: relative;
+    top:  -1px;
+    margin-right: 5px;
+    color: #ed8093;
   }
 </style>

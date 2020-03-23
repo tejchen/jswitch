@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import java.util.List;
+
 
 @Setter
 @Getter
@@ -19,9 +21,17 @@ public class JSwitchAppVO {
 
     private String appOwner;
 
+    private List<String> appMember;
+
     private Long appVersion;
 
     private String appSignKey;
 
     private boolean appCheckSign;
+
+    private String isFavorite;
+
+    private String gmtModified;
+
+    private String lastOperator;
 }

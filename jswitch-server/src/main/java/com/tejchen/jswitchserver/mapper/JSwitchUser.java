@@ -6,26 +6,25 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Setter
 @Getter
-@TableName("jswitch_app_node_event")
-public class JSwitchAppNodeEvent {
+@TableName("jswitch_user")
+public class JSwitchUser {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private String appNodeToken;
+    private String userId;
 
-    private String appNodeEventCode;
+    private String userName;
 
-    private String appNodeEventDate;
+    private String userPassword;
 
-    private String appNodeEventSn;
+    private String userLevel;
 
-    private String appNodeEventData;
+    private String userPhone;
 
-    private Date gmtCreate;
+    private String gmtCreate;
 
+    private String gmtModified;
 }

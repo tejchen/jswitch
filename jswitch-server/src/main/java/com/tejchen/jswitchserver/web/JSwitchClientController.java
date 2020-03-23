@@ -10,7 +10,9 @@ import com.tejchen.jswitchserver.helper.ResponseHelper;
 import com.tejchen.jswitchserver.mapper.JSwitchApp;
 import com.tejchen.jswitchserver.mapper.JSwitchAppConfig;
 import com.tejchen.jswitchserver.mapper.JSwitchAppNode;
-import com.tejchen.jswitchserver.service.JSwitchAppNodeEventService;
+import com.tejchen.jswitchserver.service.JSwitchEventService;
+import com.tejchen.switchcommon.event.JSwitchClientAckData;
+import com.tejchen.switchcommon.helper.SerializeHelper;
 import com.tejchen.switchcommon.protocol.http.form.JSwitchEventForm;
 import com.tejchen.jswitchserver.service.JSwitchAppConfigService;
 import com.tejchen.jswitchserver.service.JSwitchAppNodeService;
@@ -49,7 +51,7 @@ public class JSwitchClientController {
     private JSwitchAppNodeService appNodeService;
 
     @Autowired
-    private JSwitchAppNodeEventService eventService;
+    private JSwitchEventService eventService;
 
     @RequestMapping(HttpPathHelper.httpPingPath)
     public JSwitchHttpResponse ping() {
@@ -155,7 +157,17 @@ public class JSwitchClientController {
 
     @RequestMapping(value = HttpPathHelper.httpEventPath, method = RequestMethod.POST)
     public JSwitchHttpResponse event(@Validated @RequestBody JSwitchEventForm form) {
-        eventService.collectEvent(form.getToken(), form.getEventCode(), form.getEventSn(), form.getEventData());
+        JSwitchClientAckData ack = SerializeHelper.deserializeJson(form.getEventData(), JSwitchClientAckData.class);
+        if (ack == null){
+            ServerBizException.throwException(BizResult.PARAMETER_CHECK_FAIL);
+        }
+        JSwitchAppNode node = appNodeService.getOne(Wrappers.<JSwitchAppNode>lambdaQuery()
+            .eq(JSwitchAppNode::getAppCode, ack.getObject())
+            .eq(JSwitchAppNode::getAppNodeToken, form.getToken()));
+        if (node == null){
+            ServerBizException.throwException(BizResult.DATA_NOT_EXIST);
+        }
+        eventService.collectEvent(form.getToken(), node.getAppNodeIp(), form.getEventCode(), form.getEventSn(), form.getEventData(), form.getEvenLevel());
         return ResponseHelper.success();
     }
 

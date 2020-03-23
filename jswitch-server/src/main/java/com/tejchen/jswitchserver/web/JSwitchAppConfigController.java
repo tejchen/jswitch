@@ -5,23 +5,24 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tejchen.jswitchserver.base.BizResult;
 import com.tejchen.jswitchserver.base.ConfigCreateSourceEnum;
+import com.tejchen.jswitchserver.base.JSwitchWebEvent;
 import com.tejchen.jswitchserver.base.ServerBizException;
 import com.tejchen.jswitchserver.helper.ResponseHelper;
 import com.tejchen.jswitchserver.mapper.JSwitchApp;
 import com.tejchen.jswitchserver.mapper.JSwitchAppConfig;
 import com.tejchen.jswitchserver.mapper.JSwitchAppNode;
-import com.tejchen.jswitchserver.mapper.JSwitchAppNodeEvent;
+import com.tejchen.jswitchserver.mapper.JSwitchEvent;
 import com.tejchen.jswitchserver.model.JSwitchAppConfigDetailVO;
 import com.tejchen.jswitchserver.model.JSwitchAppConfigForm;
 import com.tejchen.jswitchserver.model.JSwitchAppConfigListVO;
 import com.tejchen.jswitchserver.model.JSwitchAppConfigPushResultForm;
 import com.tejchen.jswitchserver.service.JSwitchAppConfigService;
-import com.tejchen.jswitchserver.service.JSwitchAppNodeEventService;
 import com.tejchen.jswitchserver.service.JSwitchAppNodeService;
 import com.tejchen.jswitchserver.service.JSwitchAppService;
+import com.tejchen.jswitchserver.service.JSwitchEventService;
 import com.tejchen.switchcommon.event.AckFLag;
-import com.tejchen.switchcommon.event.JSwitchEvent;
-import com.tejchen.switchcommon.event.JSwitchEventAckData;
+import com.tejchen.switchcommon.event.JSwitchClientAckData;
+import com.tejchen.switchcommon.event.JSwitchClientEvent;
 import com.tejchen.switchcommon.helper.SerializeHelper;
 import com.tejchen.switchcommon.protocol.http.JSwitchHttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class JSwitchAppConfigController {
     private JSwitchAppNodeService appNodeService;
 
     @Autowired
-    private JSwitchAppNodeEventService nodeEventService;
+    private JSwitchEventService eventService;
 
 
     @RequestMapping("/detail/{appConfigCode}")
@@ -112,6 +113,7 @@ public class JSwitchAppConfigController {
     }
 
     @RequestMapping("/save")
+    @JSwitchWebEvent(action = "添加配置", object = "appCode")
     public JSwitchHttpResponse save(@Validated @RequestBody JSwitchAppConfigForm configForm){
         JSwitchAppConfig app = appConfigService.getOne(Wrappers.<JSwitchAppConfig>lambdaQuery()
                 .eq(JSwitchAppConfig::getAppCode, configForm.getAppCode())
@@ -136,6 +138,7 @@ public class JSwitchAppConfigController {
     }
 
     @RequestMapping("/update")
+    @JSwitchWebEvent(action = "仅更新配置信息", object = "appCode")
     public JSwitchHttpResponse update(@Validated @RequestBody JSwitchAppConfigForm form){
         JSwitchAppConfig config = appConfigService.getOne(Wrappers.<JSwitchAppConfig>lambdaQuery()
                 .eq(JSwitchAppConfig::getAppCode, form.getAppCode())
@@ -157,6 +160,7 @@ public class JSwitchAppConfigController {
     }
 
     @RequestMapping("/push")
+    @JSwitchWebEvent(action = "修改并推送配置", object = "appCode")
     public JSwitchHttpResponse push(@Validated @RequestBody JSwitchAppConfigForm form){
         // 校验数据
         JSwitchAppConfig config = appConfigService.getOne(Wrappers.<JSwitchAppConfig>lambdaQuery()
@@ -206,18 +210,18 @@ public class JSwitchAppConfigController {
             Map<String, String> result = form.getAppNodeTokens().stream().collect(Collectors.toMap(x->x, x->"success"));
             return ResponseHelper.success(result);
         }
-        // 搜集节点事件
-        List<JSwitchAppNodeEvent> events = nodeEventService.pickEvents(form.getAppNodeTokens(), JSwitchEvent.ACCEPT_ACK.getCode(), form.getAppCode()+"_"+form.getAppVersion());
+        // 搜集事件
+        List<JSwitchEvent> events = eventService.pickEvents(form.getAppNodeTokens(), JSwitchClientEvent.ACCEPT_ACK.getCode(), form.getAppCode()+"_"+form.getAppVersion());
         // 生成结果
         Map<String, String> result = form.getAppNodeTokens().stream().collect(Collectors.toMap(x->x, x->"pending"));
-        if (result != null && !result.isEmpty()) {
-            for (JSwitchAppNodeEvent event : events) {
+        if (events != null && !events.isEmpty()) {
+            for (JSwitchEvent event : events) {
                 // 解析
-                JSwitchEventAckData ack = SerializeHelper.deserializeJson(event.getAppNodeEventData(), JSwitchEventAckData.class);
+                JSwitchClientAckData ack = SerializeHelper.deserializeJson(event.getEventData(), JSwitchClientAckData.class);
                 if (AckFLag.SUCCESS.equals(ack.getFlag())) {
-                    result.put(event.getAppNodeToken(), "success");
+                    result.put(event.getEventOperator(), "success");
                 }else {
-                    result.put(event.getAppNodeToken(), "fail");
+                    result.put(event.getEventOperator(), "fail");
                 }
             }
         }

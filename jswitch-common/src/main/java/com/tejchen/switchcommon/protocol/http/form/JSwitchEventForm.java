@@ -28,6 +28,12 @@ public class JSwitchEventForm{
     private String eventData;
 
     /**
+     * 事件类型
+     */
+    @NotEmpty
+    private String evenLevel;
+
+    /**
      * 机器指纹
      */
     @NotEmpty

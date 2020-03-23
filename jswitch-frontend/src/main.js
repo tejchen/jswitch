@@ -22,6 +22,8 @@ new Vue({
 
 
 export default {
-  name: "VueRoot"
-}
+  name: "VueRoot",
+  methods: {
 
+  }
+}

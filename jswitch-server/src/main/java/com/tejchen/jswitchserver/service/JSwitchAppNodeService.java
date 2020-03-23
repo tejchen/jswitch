@@ -10,4 +10,6 @@ public interface JSwitchAppNodeService extends IService<JSwitchAppNode> {
     List<JSwitchAppNode> getAliveNodeList(String appCode);
 
     List<JSwitchAppNode> getAliveNodeList(List<String> appCodes);
+
+    Integer getAliveNodeCount();
 }

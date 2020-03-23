@@ -44,6 +44,7 @@ public class JSwitchConfig {
         try {
             Object data = configItem.get(configItem.getDeclaringClass());
             this.configDefaultValue = SerializeHelper.serialize(data);
+            this.configValue = this.configDefaultValue;
         } catch (IllegalAccessException e) {
             logger.error("serialize default exception!", e);
             throw new JSwitchException(String.format("serialize default exception! %s#%s", configItem.getDeclaringClass().getName(), configItem.getName()));
@@ -60,8 +61,8 @@ public class JSwitchConfig {
             }
             configItem.set(configOrigin, SerializeHelper.deserialize(configItem.getType(), configValue));
         } catch (Exception e) {
-            logger.error("update config error! expect: {}, but config is: {}", configOrigin.getName(), configValue, e);
-            throw new JSwitchException("unSupport config!");
+            logger.error("update config error! expect: {}, but data is: {}", configItem.getType().getSimpleName(), configValue, e);
+            throw new JSwitchException(String.format("jswitch not support this config! except: %s, but data is: %s", configItem.getType().getSimpleName(), configValue));
         }
     }
 }
