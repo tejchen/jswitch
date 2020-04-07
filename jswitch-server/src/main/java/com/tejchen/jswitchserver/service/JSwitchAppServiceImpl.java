@@ -8,6 +8,8 @@ import com.tejchen.jswitchserver.mapper.JSwitchApp;
 import com.tejchen.jswitchserver.mapper.JSwitchAppMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class JSwitchAppServiceImpl extends ServiceImpl<JSwitchAppMapper, JSwitchApp> implements JSwitchAppService {
 
@@ -25,5 +27,20 @@ public class JSwitchAppServiceImpl extends ServiceImpl<JSwitchAppMapper, JSwitch
             return app.getAppVersion() + 1;
         }
         return null;
+    }
+
+    @Override
+    public JSwitchApp get(String appCode) {
+        JSwitchApp app = getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appCode));
+        return app;
+    }
+
+    @Override
+    public List<JSwitchApp> list(List<String> appCodeList) {
+        if (appCodeList == null || appCodeList.isEmpty()){
+            ServerBizException.throwException(BizResult.PARAMETER_CHECK_FAIL);
+        }
+        List<JSwitchApp> appList = list(Wrappers.<JSwitchApp>lambdaQuery().in(JSwitchApp::getAppCode, appCodeList));
+        return appList;
     }
 }

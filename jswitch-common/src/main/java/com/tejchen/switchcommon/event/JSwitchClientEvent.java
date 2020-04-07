@@ -5,7 +5,7 @@ import lombok.Setter;
 
 import java.util.Arrays;
 
-public enum JSwitchEvent {
+public enum JSwitchClientEvent {
 
     ACCEPT_ACK("ACCEPT_ACK", "响应推送配置更新")
     ;
@@ -20,12 +20,12 @@ public enum JSwitchEvent {
 
 
 
-    JSwitchEvent(String code, String desc){
+    JSwitchClientEvent(String code, String desc){
         this.code = code;
         this.desc = desc;
     }
 
-    public static JSwitchEvent formatEvent(String code){
+    public static JSwitchClientEvent formatEvent(String code){
         if (code == null){
             return null;
         }

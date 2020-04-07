@@ -43,7 +43,7 @@ public class JSwitchPushHandler implements JSwitchRemoteHandle<JSwitchConfig> {
         if (!this.jswitchConfigs.isEmpty()) {
             List<JSwitchPushItem> items = jswitchConfigs.stream().map(jswitchConfig->{
                 JSwitchPushItem item = new JSwitchPushItem();
-                item.setType(jswitchConfig.getConfigOrigin().getTypeName());
+                item.setType(jswitchConfig.getConfigItem().getType().getName());
                 item.setConfigCode(jswitchConfig.getConfigCode());
                 item.setConfigName(jswitchConfig.getConfigName().equals("") ? jswitchConfig.getConfigCode() : jswitchConfig.getConfigName());
                 item.setDefaultValue(jswitchConfig.getConfigDefaultValue());

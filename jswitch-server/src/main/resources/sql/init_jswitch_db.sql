@@ -39,17 +39,43 @@ CREATE TABLE `jswitch_app_node`(
 	`gmt_create` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
 	`last_heartbeat_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '节点上次心跳时间',
 	PRIMARY KEY (`id`),
-    UNIQUE INDEX uk_app_node (`app_code`, `app_node_token`)
+  UNIQUE INDEX uk_app_node (`app_code`, `app_node_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT 'JSwitch应用节点表';
 
-CREATE TABLE `jswitch_app_node_event`(
+CREATE TABLE `jswitch_event`(
     `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
-    `app_node_token` varchar(50) NOT NULL DEFAULT ''  COMMENT '节点标示',
-    `app_node_event_code` varchar(50) NOT NULL DEFAULT ''  COMMENT '节点事件',
-    `app_node_event_date` varchar(10) DEFAULT '0000-00-00' COMMENT '节点事件发生日期',
-    `app_node_event_sn` varchar(40) NOT NULL DEFAULT ''  COMMENT '节点事件序列号',
-    `app_node_event_data` varchar(200) NOT NULL DEFAULT ''  COMMENT '节点数据',
+    `event` varchar(100) NOT NULL DEFAULT ''  COMMENT '事件',
+    `event_sn` varchar(40) NOT NULL DEFAULT ''  COMMENT '事件序列号',
+    `event_data` varchar(2000) NOT NULL DEFAULT ''  COMMENT '事件数据',
+    `event_message` varchar(200) DEFAULT ''  COMMENT '事件消息',
+    `event_operator` varchar(50) NOT NULL DEFAULT ''  COMMENT '事件操作人',
+    `event_operator_name` varchar(20) NOT NULL DEFAULT ''  COMMENT '事件操作人',
+    `event_level` varchar(10) NOT NULL DEFAULT ''  COMMENT '事件等级 info信息/success成功error异常的等',
+    `event_date` varchar(10) DEFAULT '0000-00-00' COMMENT '事件发生日期, 用于索引',
     `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    INDEX idx_app_node (`app_node_token`, `app_node_event_date`, `app_node_event_sn`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT 'JSwitch应用节点事件表';
+    INDEX idx_date_event (`event_date`, `event`, `event_sn`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT 'JSwitch事件表';
+
+CREATE TABLE `jswitch_user`(
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `user_id` varchar(50) NOT NULL DEFAULT ''  COMMENT '用户id',
+    `user_name` varchar(50) NOT NULL DEFAULT ''  COMMENT '用户名字',
+    `user_password` varchar(50) NOT NULL COMMENT '用户密码（MD5）',
+    `user_level` varchar(40) NOT NULL DEFAULT ''  COMMENT '用户权限等级',
+    `user_phone` varchar(40) NOT NULL DEFAULT ''  COMMENT '用户手机号',
+    `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `gmt_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    INDEX idx_user (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT 'JSwitch用户表';
+
+CREATE TABLE `jswitch_user_favorite`(
+    `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `user_id` varchar(50) NOT NULL COMMENT '登陆名',
+    `favorite_type` varchar(50) NOT NULL COMMENT '喜好类型',
+    `favorite_object` varchar(50) NOT NULL COMMENT '喜好对象',
+    `gmt_create` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX uk_user_favorite (`user_id`, `favorite_type`, `favorite_object`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT 'JSwitch用户喜好表';

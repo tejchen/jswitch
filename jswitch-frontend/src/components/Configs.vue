@@ -2,7 +2,7 @@
   <div style="height: 100%">
     <Breadcrumb>
       <BreadcrumbItem to="/configs">
-        <Icon type="md-list" /> 配置管理
+        <Icon type="md-list" class="icon-top-1"/> 配置管理
       </BreadcrumbItem>
     </Breadcrumb>
     <Layout :style="{height:'100%'}">
@@ -167,15 +167,15 @@
       :mask-closable="false"
       class-name="vertical-center-modal">
 		  <div v-for="node in nodes">
-        <Spin size="small" :style="{display: node.status == 1 ? 'inline-block' : 'none'}">
+        <Spin size="small" :style="{display: node.status == 'pending' ? 'inline-block' : 'none'}">
           <Icon style="color: #ff9900" type="ios-loading" size=15 class="loading-spin-icon-load"></Icon>
           <div style="display: inline-block; color: #ff9900">正在推送</div>
         </Spin>
-        <Spin size="small" :style="{display: node.status == 2 ? 'inline-block' : 'none'}">
+        <Spin size="small" :style="{display: node.status == 'success' ? 'inline-block' : 'none'}">
           <Icon style="color: #19be6b" type="md-checkmark-circle-outline" size=15 class="success-spin-icon-load"></Icon>
           <div style="display: inline-block; color: #19be6b">推送成功</div>
         </Spin>
-        <Spin size="small" :style="{display: node.status == 3 ? 'inline-block' : 'none'}">
+        <Spin size="small" :style="{display: node.status == 'fail' ? 'inline-block' : 'none'}">
           <Icon style="color: #ed4014" type="md-close-circle" size=15 class="fail-spin-icon-load"></Icon>
           <div style="display: inline-block; color: #ed4014">推送失败</div>
         </Spin>
@@ -257,22 +257,27 @@
         columns: [
           {
             title: '应用编码',
-            key: 'appCode'
+            key: 'appCode',
+            width: 150,
           },{
             title: '配置编码',
-            key: 'appConfigCode'
+            key: 'appConfigCode',
           },{
             title: '配置名称',
-            key: 'appConfigName'
+            key: 'appConfigName',
+            width: 180,
           },{
             title: '创建来源',
-            key: 'appConfigSource'
+            key: 'appConfigSource',
+            width: 100
           },{
             title: '最后修改时间',
-            key: 'lastUpdateTime'
+            key: 'lastUpdateTime',
+            width: 150
           },{
             title: '操作',
-            slot: 'action'
+            slot: 'action',
+            width: 140
           }
         ],
         data: [],
@@ -286,7 +291,45 @@
         searchColumns: [
           {
             title: 'appKeyword',
-            key: 'appCode'
+            key: 'appCode',
+            render: (h, params) => {
+              let favoriteIcon =h('Icon', {
+                props: {
+                  type: 'ios-heart',
+                  size: 18,
+                },
+                class: 'heart_icon_favorite',
+                style: {
+                  display: params.row.isFavorite === 'N' ? 'none' : 'inline-block',
+                },
+                on:{
+                  click: (event) => {
+                    this.unFavorite(event, 'APP', params.row.appCode)
+                  },
+                }
+              });
+              let unFavoriteIcon =h('Icon', {
+                props: {
+                  type: 'ios-heart-outline',
+                  size: 18,
+                },
+                class: 'heart_icon',
+                style: {
+                  display: params.row.isFavorite === 'Y' ? 'none' : 'inline-block',
+                },
+                on: {
+                  click: (event) => {
+                    this.favorite(event, 'APP', params.row.appCode)
+                  },
+                }
+              });
+              let content = h('span', params.row.appCode)
+              return h('div', [
+                favoriteIcon,
+                unFavoriteIcon,
+                content
+              ]);
+            }
           }
         ],
         searchData: [],
@@ -351,9 +394,59 @@
       }
     },
     mounted (){
+      if (this.$route.params.appCode != null){
+        this.appKeyword = this.$route.params.appCode
+      }
       this.loadSearchTable(this.appKeyword, this.searchCurrentPage, this.searchPageSize)
     },
     methods: {
+      favorite: function(event, type, object){
+        let config = {}
+        config.params = {
+          favoriteType: type,
+          favoriteObject: object,
+        }
+        let _this = this
+        _this.tableLoading = true
+        _this.$network.get('/jswitch/user/favorite/add', config, function (data) {
+          for(let item of _this.data){
+            if (item.appCode === object){
+              item.isFavorite = 'Y'
+            }
+          }
+          _this.$Notice.success({
+            title: '操作提醒',
+            desc:  '关注成功'
+          });
+        })
+        _this.tableLoading = false
+        // 切换图标
+        event.target.style.display = 'None'
+        event.target.previousSibling.style.display = 'inline-block'
+      },
+      unFavorite: function(event, type, object){
+        let config = {}
+        config.params = {
+          favoriteType: type,
+          favoriteObject: object,
+        }
+        let _this = this
+        _this.tableLoading = true
+        _this.$network.get('/jswitch/user/favorite/remove', config, function (data) {
+          for(let item of _this.data){
+            if (item.appCode === object){
+              item.isFavorite = 'N'
+            }
+          }
+          _this.$Notice.success({
+            title: '操作提醒',
+            desc:  '取消关注成功'
+          });
+        })
+        _this.tableLoading = false
+        event.target.style.display = 'None'
+        event.target.nextSibling.style.display = 'inline-block'
+      },
       createConfig: function(){
         if (this.createFormData.appConfigCode === ''){
           this.$Notice.warning({
@@ -407,7 +500,7 @@
         let config = JSON.parse(JSON.stringify(this.editFormData))
         let _this = this
         _this.$network.post('/jswitch/app/config/push', config, function (data) {
-          if (data.length == 0) {
+          if (data.appNodes.length === 0) {
             _this.$Notice.success({
               title: '操作提醒',
               desc:  '修改成功，目前该应用没有在线机器'
@@ -426,13 +519,24 @@
               _this.nodes.push({
                 'ip': node.appNodeIp,
                 'token': node.appNodeToken,
-                'status': 1,
+                'status': 'pending',
               })
               appNodeTokens.push(node.appNodeToken)
             }
             console.log(appNodeTokens)
             // 启动默认轮训
+            let counter = 0
             _this.timer = setInterval(function () {
+              if (counter >= 20){
+                clearInterval(_this.timer)
+                // 超时失败
+                for(var node of _this.nodes){
+                  if (node.status == 'pending'){
+                    node.status = "fail"
+                  }
+                }
+                return
+              }
               let params = {
                 appCode: appCode,
                 appVersion: appVersion,
@@ -443,19 +547,21 @@
                   for(var node of _this.nodes){
                     // 更新该节点数据
                     if (token === node.token){
-                      node.status = data[token] === 'success' ? 2 : (data[token] === 'fail' ? 3 : 1)
+                      node.status = data[token]
                     }
                   }
                 }
                 // 如果全部节点结束，则取消该定时器
                 var flag = true
                 for(var node of _this.nodes){
-                  if (node.status == 1){
+                  if (node.status == 'pending'){
                     flag = false
                   }
                 }
                 if (flag) {
                   clearInterval(_this.timer)
+                }else{
+                  counter++
                 }
               })
             }, 1000)
@@ -465,7 +571,7 @@
         })
       },
       updateConfig: function() {
-        let config = JSON.parse(JSON.stringify(thiss.editFormData))
+        let config = JSON.parse(JSON.stringify(this.editFormData))
         let _this = this
         _this.$network.post('/jswitch/app/config/update', config, function (data) {
           _this.$Notice.success({
@@ -488,7 +594,7 @@
         this.loadTable(this.configKeyword, 0, this.pageSize)
       },
       searchApps: function () {
-        this.loadSearchTable(this.appKeyword, this.searchCurrentPage, this.searchCurrentPage)
+        this.loadSearchTable(this.appKeyword, this.searchCurrentPage, this.searchPageSize)
       },
       searchConfigs: function () {
         this.loadTable(this.configKeyword, this.currentPage, this.pageSize)
@@ -530,6 +636,7 @@
           _this.editFormData.appConfigContent = data.appConfigContent
           _this.editFormData.appConfigContentSource = data.appConfigContent
           // 生成ip地址
+          _this.editFormData.appNodes = []
           if (data.appNodes.length === 0){
             _this.editFormData.appNodes.push("暂无在线机器")
           }else{
@@ -554,23 +661,32 @@
             return
           }
           console.log(data)
-          _this.searchPageTotal = data['total']
-          _this.searchCurrentPage = data['pageNo']
-          _this.searchPageSize = data['pageSize']
           _this.searchData = []
           if (data['dataList'] != null){
             for (let item of data['dataList']){
               _this.searchData.push({
-                'appCode': item['appCode'],
-                'appName': item['appName'],
+                appCode: item['appCode'],
+                appName: item['appName'],
+                isFavorite: item['isFavorite'],
               })
             }
-            //默认选中第一个
             if(_this.searchData.length > 0){
-              _this.searchData[0]._highlight = true
-              //触发表格加载
-              _this.selectedAppCode = _this.searchData[0].appCode
-              _this.loadTable(_this.configKeyword, 0, _this.pageSize)
+              //查找完全想等的数据
+              let selected = false
+              for (let item of _this.searchData){
+                if (item.appCode === keyword){
+                  selected = true
+                  item._highlight = true
+                  _this.selectedAppCode = item.appCode
+                  _this.loadTable(_this.configKeyword, 0, _this.pageSize)
+                }
+              }
+              //默认选中第一个
+              if (!selected){
+                _this.searchData[0]._highlight = true
+                _this.selectedAppCode = _this.searchData[0].appCode
+                _this.loadTable(_this.configKeyword, 0, _this.pageSize)
+              }
             }
           }
           _this.searchTableLoading = false

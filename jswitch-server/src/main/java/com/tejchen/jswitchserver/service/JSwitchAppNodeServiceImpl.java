@@ -35,4 +35,13 @@ public class JSwitchAppNodeServiceImpl extends ServiceImpl<JSwitchAppNodeMapper,
         );
         return nodes;
     }
+
+    @Override
+    public Integer getAliveNodeCount() {
+        String aliveTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date(new Date().getTime()-duration));
+        int aliveNodeCount = count(Wrappers.<JSwitchAppNode>lambdaQuery()
+                .gt(JSwitchAppNode::getLastHeartbeatTime, aliveTime)
+        );
+        return aliveNodeCount;
+    }
 }

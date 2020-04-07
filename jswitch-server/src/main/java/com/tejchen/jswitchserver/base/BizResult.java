@@ -12,6 +12,7 @@ public enum  BizResult {
     PARAMETER_CHECK_FAIL("100004", "参数校验失败，请检查！"),
     SIGN_CHECK_FAIL("100005", "非法签名！"),
     NODE_IS_EMPTY("100006", "没有在线机器！"),
+    EVENT_ERR("100007", "事件记录失败"),
     ;
 
     @Getter

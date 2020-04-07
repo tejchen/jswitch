@@ -2,7 +2,7 @@
   <div>
     <Breadcrumb>
       <BreadcrumbItem to="/apps">
-        <Icon type="ios-apps"></Icon> 应用管理
+        <Icon type="ios-apps" class="icon-top-1"></Icon> 应用管理
       </BreadcrumbItem>
     </Breadcrumb>
     <div>
@@ -25,7 +25,7 @@
         </template>
         <template slot-scope="{ row, index }" slot="action">
           <div style="margin: 0 auto">
-            <Button type="info" ghost size="small" style="margin-right: 7px; padding: 3px">查看配置</Button>
+            <Button :to="{name: 'Configs', params: {appCode: row.appCode}}" type="info" ghost size="small" style="margin-right: 7px; padding: 3px">查看配置</Button>
             <Button ghost type="error" size="small" style="padding: 3px" @click="editView = true; tableAction(index)">修改</Button>
           </div>
         </template>
@@ -217,7 +217,45 @@
         columns: [
           {
             title: '应用编码',
-            key: 'appCode'
+            key: 'appCode',
+            render: (h, params) => {
+              let favoriteIcon =h('Icon', {
+                props: {
+                  type: 'ios-heart',
+                  size: 18,
+                },
+                class: 'heart_icon_favorite',
+                style: {
+                  display: params.row.isFavorite === 'N' ? 'none' : 'inline-block',
+                },
+                on:{
+                  click: (event) => {
+                    this.unFavorite(event, 'APP', params.row.appCode)
+                  },
+                }
+              });
+              let unFavoriteIcon =h('Icon', {
+                props: {
+                  type: 'ios-heart-outline',
+                  size: 18,
+                },
+                class: 'heart_icon',
+                style: {
+                  display: params.row.isFavorite === 'Y' ? 'none' : 'inline-block',
+                },
+                on: {
+                  click: (event) => {
+                    this.favorite(event, 'APP', params.row.appCode)
+                  },
+                }
+              });
+              let content = h('span', params.row.appCode)
+              return h('div', [
+                favoriteIcon,
+                unFavoriteIcon,
+                content
+              ]);
+            }
           },
           {
             title: '应用名称',
@@ -225,19 +263,23 @@
           },
           {
             title: '负责人',
-            key: 'appOwner'
+            key: 'appOwner',
+            width: 150
           },
           {
             title: '在线机器',
-            key: 'onlineMachineCount'
+            key: 'onlineMachineCount',
+            width: 100
           },
           {
             title: '创建时间',
-            key: 'createTime'
+            key: 'createTime',
+            width: 150
           },
           {
             title: '操作',
-            slot: 'action'
+            slot: 'action',
+            width: 150
           }
         ],
         data: [],
@@ -296,6 +338,53 @@
       this.loadTable(this.keyword, this.currentPage, this.pageSize)
     },
     methods: {
+      favorite: function(event, type, object){
+        let config = {}
+        config.params = {
+          favoriteType: type,
+          favoriteObject: object,
+        }
+        let _this = this
+        _this.tableLoading = true
+        _this.$network.get('/jswitch/user/favorite/add', config, function (data) {
+          for(let item of _this.data){
+            if (item.appCode === object){
+              item.isFavorite = 'Y'
+            }
+          }
+          _this.$Notice.success({
+            title: '操作提醒',
+            desc:  '关注成功'
+          });
+        })
+        _this.tableLoading = false
+        // 切换图标
+        event.target.style.display = 'None'
+        event.target.previousSibling.style.display = 'inline-block'
+      },
+      unFavorite: function(event, type, object){
+        let config = {}
+        config.params = {
+          favoriteType: type,
+          favoriteObject: object,
+        }
+        let _this = this
+        _this.tableLoading = true
+        _this.$network.get('/jswitch/user/favorite/remove', config, function (data) {
+          for(let item of _this.data){
+            if (item.appCode === object){
+              item.isFavorite = 'N'
+            }
+          }
+          _this.$Notice.success({
+            title: '操作提醒',
+            desc:  '取消关注成功'
+          });
+        })
+        _this.tableLoading = false
+        event.target.style.display = 'None'
+        event.target.nextSibling.style.display = 'inline-block'
+      },
       createApp: function(){
         if (this.createFormData.appCode === ''){
           this.$Notice.warning({
@@ -411,6 +500,7 @@
                 'appOwner': item['appOwner'],
                 'onlineMachineCount': item['onlineMachineCount'] + ' 台',
                 'createTime': item['gmtCreate'],
+                'isFavorite': item['isFavorite'],
               })
             }
           }

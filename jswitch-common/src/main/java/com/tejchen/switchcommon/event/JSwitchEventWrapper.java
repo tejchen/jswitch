@@ -10,11 +10,15 @@ import lombok.ToString;
 @ToString
 public class JSwitchEventWrapper {
 
-    private String eventCode;
+
+    private String event;
 
     private String eventSn;
 
-    private String token;
+    private String eventLevel;
 
     private JSwitchEventData eventData;
+
+    private String token;
+
 }

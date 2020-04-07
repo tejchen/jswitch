@@ -19,6 +19,8 @@ public class JSwitchAppListVO {
 
     private String appOwner;
 
+    private String isFavorite;
+
     private String gmtCreate;
 
     private String gmtModified;

@@ -1,9 +1,6 @@
 package com.tejchen.switchcommon.helper;
 
-import com.tejchen.switchcommon.event.AckFLag;
-import com.tejchen.switchcommon.event.JSwitchEvent;
-import com.tejchen.switchcommon.event.JSwitchEventAckData;
-import com.tejchen.switchcommon.event.JSwitchEventWrapper;
+import com.tejchen.switchcommon.event.*;
 
 public class EventHelper {
 
@@ -14,11 +11,16 @@ public class EventHelper {
      */
     public static JSwitchEventWrapper acceptedPush(String appCode, String version){
         JSwitchEventWrapper event = new JSwitchEventWrapper();
-        event.setEventCode(JSwitchEvent.ACCEPT_ACK.getCode());
+        event.setEvent(JSwitchClientEvent.ACCEPT_ACK.getCode());
         event.setToken(NodeHelper.generateToken());
         event.setEventSn(appCode+"_"+version);
-        event.setEventData(new JSwitchEventAckData(){{
-            setCode(JSwitchEvent.ACCEPT_ACK.getCode());
+        event.setEventLevel(EventLevel.SUCCESS);
+        event.setEventData(new JSwitchClientAckData(){{
+            setOperator(NodeHelper.generateToken());
+            setAction("接收配置推送");
+            setObject(appCode);
+            setResult(true);
+            setCode(JSwitchClientEvent.ACCEPT_ACK.getCode());
             setFlag(AckFLag.SUCCESS);
         }});
         return event;
@@ -29,14 +31,20 @@ public class EventHelper {
      * @param version
      * @return
      */
-    public static JSwitchEventWrapper unacceptedPush(String appCode, String version){
+    public static JSwitchEventWrapper unacceptedPush(String appCode, String version, String message){
         JSwitchEventWrapper event = new JSwitchEventWrapper();
-        event.setEventCode(JSwitchEvent.ACCEPT_ACK.getCode());
+        event.setEvent(JSwitchClientEvent.ACCEPT_ACK.getCode());
         event.setToken(NodeHelper.generateToken());
         event.setEventSn(appCode+"_"+version);
-        event.setEventData(new JSwitchEventAckData(){{
-            setCode(JSwitchEvent.ACCEPT_ACK.getCode());
+        event.setEventLevel(EventLevel.ERROR);
+        event.setEventData(new JSwitchClientAckData(){{
+            setOperator(NodeHelper.generateToken());
+            setAction("接收配置推送");
+            setObject(appCode);
+            setResult(false);
+            setCode(JSwitchClientEvent.ACCEPT_ACK.getCode());
             setFlag(AckFLag.FAIL);
+            setMessage(message);
         }});
         return event;
     }
