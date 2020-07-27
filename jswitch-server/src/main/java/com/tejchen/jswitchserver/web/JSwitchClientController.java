@@ -178,7 +178,7 @@ public class JSwitchClientController {
         // 判断应用是否存在
         JSwitchApp app = appService.getOne(Wrappers.<JSwitchApp>lambdaQuery().eq(JSwitchApp::getAppCode, appCode));
         if (app == null){
-            throw new ServerBizException(BizResult.DATA_NOT_EXIST, appCode+"应用不存在");
+            throw new ServerBizException(BizResult.DATA_NOT_EXIST, appCode+" 应用不存在");
         }
         // 判断是否检查签名
         if ("Y".equals(app.getAppSignFlag())) {

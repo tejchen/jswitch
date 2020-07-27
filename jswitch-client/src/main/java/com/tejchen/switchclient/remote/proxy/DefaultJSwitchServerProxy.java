@@ -54,8 +54,8 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
         String pingResult = HttpHelper.get(httpClient, url, null);
         JSwitchHttpResponse pingResponse = SerializeHelper.deserializeJson(pingResult, JSwitchHttpResponse.class);
         if (!"pong".equals(pingResponse.getData())){
-            logger.error("http connected err! {}", server);
-            return false;
+            logger.error("cannot ping server {}, {}", server, pingResponse);
+            throw new JSwitchException(String.format("cannot ping server %s: %s", server, pingResponse.getMessage()));
         }
         logger.info("http connected success!");
         // 生成机器指纹
@@ -68,8 +68,8 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
         String versionResult = HttpHelper.postBody(httpClient, versionUrl, heartbeatForm);
         JSwitchHttpResponseEnhancer<JSwitchHeartbeat> response = SerializeHelper.deserializeJson(versionResult, new TypeReference<JSwitchHttpResponseEnhancer<JSwitchHeartbeat>>(){});
         if (response == null || response.getData() == null || !response.isSuccess()){
-            logger.error("init version err! {}, {}", server, response);
-            return false;
+            logger.error("cannot connect server! {}, {}", server, response);
+            throw new JSwitchException(String.format("cannot connect server %s: %s", server, response.getMessage()));
         }
         baseVersion = response.getData().getAppVersion();
         return true;
@@ -95,9 +95,15 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
         for (JSwitchPullItem item : batchPull.getValues()) {
             result.put(item.getKey(), item.getValue());
         }
+        // 心跳
         if (!registered) {
-            initHeartbeat(appCode, keys);
-            registered = true;
+            synchronized (DefaultJSwitchServerProxy.class){
+                if (!registered) {
+                    initHeartbeat(appCode, keys);
+                    registered = true;
+                }
+            }
+
         }
         return result;
     }

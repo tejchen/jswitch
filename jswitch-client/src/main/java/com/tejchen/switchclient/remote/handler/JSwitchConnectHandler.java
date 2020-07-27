@@ -1,10 +1,8 @@
 package com.tejchen.switchclient.remote.handler;
 
 
-import com.tejchen.switchclient.model.JSwitchConfig;
 import com.tejchen.switchclient.remote.JSwitchRemoteHandle;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
-import com.tejchen.switchclient.remote.listener.DefaultJSwitchListener;
 import com.tejchen.switchcommon.JSwitchException;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,16 +35,28 @@ public class JSwitchConnectHandler implements JSwitchRemoteHandle<String> {
     public void handle() {
         if (!this.servers.isEmpty()) {
             boolean connected = false;
+            String result = "";
             for (String server : servers) {
-                connected = connected || proxy.connect(appName, server);
-                // 只要其中一台连接上即可
+                result = this.connect(appName, server);
+                connected = connected || "".equals(result);
                 if (connected){
                     break;
                 }
             }
             if (!connected){
-                throw new JSwitchException("connect err!");
+                throw new JSwitchException(result);
             }
+        }
+    }
+
+    private String connect(String appName, String server){
+        try{
+            proxy.connect(appName, server);
+            return "";
+        }catch (JSwitchException je){
+            return je.getMessage();
+        }catch (Exception e){
+            return String.format("connect got an unknown exception: %s", e);
         }
     }
 }
