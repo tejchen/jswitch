@@ -1,6 +1,6 @@
 package com.tejchen.switchclient.remote.listener;
 
-import com.tejchen.switchclient.model.JSwitchConfig;
+import com.tejchen.switchclient.model.CacheData;
 import com.tejchen.switchclient.remote.JSwitchListener;
 import com.tejchen.switchcommon.JSwitchException;
 import lombok.Getter;
@@ -8,27 +8,27 @@ import lombok.Getter;
 public class DefaultJSwitchListener implements JSwitchListener {
 
     @Getter
-    private JSwitchConfig JSwitchConfig;
+    private CacheData cacheData;
 
 
-    public DefaultJSwitchListener(JSwitchConfig JSwitchConfig) {
-        this.JSwitchConfig = JSwitchConfig;
+    public DefaultJSwitchListener(CacheData cacheData) {
+        this.cacheData = cacheData;
     }
 
     @Override
     public String listenApp() {
-        return JSwitchConfig.getConfigApp();
+        return cacheData.getConfigApp();
     }
 
     @Override
     public String listenKey() {
-        return JSwitchConfig.getConfigCode();
+        return cacheData.getConfigCode();
     }
 
     @Override
-    public boolean onChange(String newConfigText) throws JSwitchException {
-        if (!newConfigText.equals(JSwitchConfig.getConfigValue())) {
-            JSwitchConfig.updateConfig(newConfigText);
+    public boolean receiveConfig(String val) throws JSwitchException {
+        if (!val.equals(cacheData.getConfigValue())) {
+            cacheData.update(val);
             return true;
         }
         return false;

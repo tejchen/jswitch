@@ -13,7 +13,7 @@ public interface JSwitchServerProxy {
      * @param server
      * @return
      */
-    boolean connect(String appCode, String server);
+    boolean init(String appCode, String server);
 
     /**
      * 拉取配置

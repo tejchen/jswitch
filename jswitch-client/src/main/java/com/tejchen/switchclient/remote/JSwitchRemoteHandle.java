@@ -2,7 +2,7 @@ package com.tejchen.switchclient.remote;
 
 public interface JSwitchRemoteHandle<T> {
 
-    void addItem(T item);
+    void append(T item);
 
     void handle();
 }

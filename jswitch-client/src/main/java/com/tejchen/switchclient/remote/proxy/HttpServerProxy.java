@@ -33,9 +33,9 @@ import java.util.concurrent.TimeUnit;
  * 默认通过http连接到server
  * 基于心跳版本号，更新本地缓存的配置
  */
-public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
+public class HttpServerProxy implements JSwitchServerProxy {
 
-    private final Logger                    logger = LoggerFactory.getLogger(DefaultJSwitchServerProxy.class);
+    private final Logger                    logger = LoggerFactory.getLogger(HttpServerProxy.class);
     private HttpClient                      httpClient;
     private String                          server;
     private String                          token;
@@ -46,7 +46,7 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
     private JSwitchEventCollector           collector = new DefaultJSwitchEventCollector();
 
 
-    public boolean connect(String appCode, String server) {
+    public boolean init(String appCode, String server) {
         this.server = server;
         this.httpClient = HttpClients.createDefault();
         // ping
@@ -54,8 +54,8 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
         String pingResult = HttpHelper.get(httpClient, url, null);
         JSwitchHttpResponse pingResponse = SerializeHelper.deserializeJson(pingResult, JSwitchHttpResponse.class);
         if (!"pong".equals(pingResponse.getData())){
-            logger.error("http connected err! {}", server);
-            return false;
+            logger.error("cannot ping server {}, {}", server, pingResponse);
+            throw new JSwitchException(String.format("cannot ping server %s: %s", server, pingResponse.getMessage()));
         }
         logger.info("http connected success!");
         // 生成机器指纹
@@ -68,8 +68,8 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
         String versionResult = HttpHelper.postBody(httpClient, versionUrl, heartbeatForm);
         JSwitchHttpResponseEnhancer<JSwitchHeartbeat> response = SerializeHelper.deserializeJson(versionResult, new TypeReference<JSwitchHttpResponseEnhancer<JSwitchHeartbeat>>(){});
         if (response == null || response.getData() == null || !response.isSuccess()){
-            logger.error("init version err! {}, {}", server, response);
-            return false;
+            logger.error("cannot connect server! {}, {}", server, response);
+            throw new JSwitchException(String.format("cannot connect server %s: %s", server, response.getMessage()));
         }
         baseVersion = response.getData().getAppVersion();
         return true;
@@ -95,9 +95,15 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
         for (JSwitchPullItem item : batchPull.getValues()) {
             result.put(item.getKey(), item.getValue());
         }
+        // 心跳
         if (!registered) {
-            initHeartbeat(appCode, keys);
-            registered = true;
+            synchronized (HttpServerProxy.class){
+                if (!registered) {
+                    initHeartbeat(appCode, keys);
+                    registered = true;
+                }
+            }
+
         }
         return result;
     }
@@ -150,7 +156,7 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
                             String value = newKeyValue.get(key);
                             JSwitchListener listener = listenerMap.get(key);
                             if (listener != null) {
-                                boolean result = listener.onChange(value);
+                                boolean result = listener.receiveConfig(value);
                                 if (result) {
                                     logger.info("listener update config success, key:{}, value:{}", key, value);
                                 }
@@ -170,7 +176,7 @@ public class DefaultJSwitchServerProxy implements JSwitchServerProxy {
             }catch (Exception e){
                 logger.warn("heartbeat err!", e);
             }
-        }, 5, 5, TimeUnit.SECONDS);
+        }, 5, 100, TimeUnit.MILLISECONDS);
     }
 
     // 默认事件收集器

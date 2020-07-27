@@ -1,7 +1,7 @@
 package com.tejchen.switchclient.remote.handler;
 
 
-import com.tejchen.switchclient.model.JSwitchConfig;
+import com.tejchen.switchclient.model.CacheData;
 import com.tejchen.switchclient.remote.JSwitchRemoteHandle;
 import com.tejchen.switchclient.remote.listener.DefaultJSwitchListener;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
@@ -15,28 +15,28 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-public class JSwitchListenHandler implements JSwitchRemoteHandle<JSwitchConfig> {
+public class JSwitchListenHandler implements JSwitchRemoteHandle<CacheData> {
 
     private JSwitchServerProxy          proxy;
 
-    private List<JSwitchConfig>         jswitchConfigs;
+    private List<CacheData>             cacheDataList;
 
     private String                      appName;
 
     public JSwitchListenHandler(String appName, JSwitchServerProxy proxy) {
         this.appName = appName;
         this.proxy = proxy;
-        this.jswitchConfigs = new ArrayList<>();
+        this.cacheDataList = new ArrayList<>();
     }
 
-    public void addItem(JSwitchConfig jswitchConfig){
-        jswitchConfigs.add(jswitchConfig);
+    public void append(CacheData cacheData){
+        cacheDataList.add(cacheData);
     }
 
     public void handle() {
-        if (!this.jswitchConfigs.isEmpty()) {
-            for (JSwitchConfig jswitchConfig : jswitchConfigs) {
-                proxy.addListener(new DefaultJSwitchListener(jswitchConfig));
+        if (!this.cacheDataList.isEmpty()) {
+            for (CacheData cacheData : cacheDataList) {
+                proxy.addListener(new DefaultJSwitchListener(cacheData));
             }
         }
     }

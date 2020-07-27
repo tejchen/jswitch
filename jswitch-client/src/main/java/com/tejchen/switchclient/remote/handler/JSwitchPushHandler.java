@@ -1,7 +1,7 @@
 package com.tejchen.switchclient.remote.handler;
 
 
-import com.tejchen.switchclient.model.JSwitchConfig;
+import com.tejchen.switchclient.model.CacheData;
 import com.tejchen.switchclient.remote.JSwitchRemoteHandle;
 import com.tejchen.switchcommon.JSwitchException;
 import com.tejchen.switchcommon.protocol.http.form.JSwitchPushItem;
@@ -19,29 +19,29 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 @ToString
-public class JSwitchPushHandler implements JSwitchRemoteHandle<JSwitchConfig> {
+public class JSwitchPushHandler implements JSwitchRemoteHandle<CacheData> {
     private static final Logger logger = LoggerFactory.getLogger(JSwitchPushHandler.class);
 
     private JSwitchServerProxy          proxy;
 
     private String                      appName;
 
-    private List<JSwitchConfig>         jswitchConfigs;
+    private List<CacheData>             cacheDataList;
 
     public JSwitchPushHandler(String appName, JSwitchServerProxy proxy) {
         this.appName = appName;
         this.proxy = proxy;
-        this.jswitchConfigs = new ArrayList<>();
+        this.cacheDataList = new ArrayList<>();
     }
 
-    public void addItem(JSwitchConfig jswitchConfig){
-        jswitchConfigs.add(jswitchConfig);
+    public void append(CacheData cacheData){
+        cacheDataList.add(cacheData);
     }
 
     public void handle() {
         // 推送
-        if (!this.jswitchConfigs.isEmpty()) {
-            List<JSwitchPushItem> items = jswitchConfigs.stream().map(jswitchConfig->{
+        if (!this.cacheDataList.isEmpty()) {
+            List<JSwitchPushItem> items = cacheDataList.stream().map(jswitchConfig->{
                 JSwitchPushItem item = new JSwitchPushItem();
                 item.setType(jswitchConfig.getConfigItem().getType().getName());
                 item.setConfigCode(jswitchConfig.getConfigCode());

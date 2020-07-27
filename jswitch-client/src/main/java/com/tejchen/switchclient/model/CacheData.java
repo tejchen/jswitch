@@ -14,8 +14,8 @@ import java.lang.reflect.Field;
 @Setter
 @Getter
 @ToString
-public class JSwitchConfig {
-    private static final Logger logger = LoggerFactory.getLogger(JSwitchConfig.class);
+public class CacheData {
+    private static final Logger logger = LoggerFactory.getLogger(CacheData.class);
 
     // 应用名称
     private String      configApp;
@@ -34,7 +34,7 @@ public class JSwitchConfig {
     // 默认值
     private String      configDefaultValue;
 
-    public JSwitchConfig(String appName, JSwitch jswitch, Field configItem){
+    public CacheData(String appName, JSwitch jswitch, Field configItem){
         this.configApp = appName;
         this.configCode = jswitch.code();
         this.configName = jswitch.name();
@@ -51,7 +51,7 @@ public class JSwitchConfig {
         }
     }
 
-    public void updateConfig(String configValue){
+    public void update(String configValue){
         this.configValue = configValue;
         try {
             configItem.setAccessible(true);

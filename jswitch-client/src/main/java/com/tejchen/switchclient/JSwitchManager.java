@@ -2,11 +2,11 @@ package com.tejchen.switchclient;
 
 import com.tejchen.switchclient.helper.AnnotationHelper;
 import com.tejchen.switchclient.helper.JSwitchServerHelper;
-import com.tejchen.switchclient.model.JSwitchConfig;
+import com.tejchen.switchclient.model.CacheData;
 import com.tejchen.switchclient.model.JSwitchContext;
 import com.tejchen.switchclient.remote.JSwitchRemoteHandle;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
-import com.tejchen.switchclient.remote.handler.JSwitchConnectHandler;
+import com.tejchen.switchclient.remote.handler.JSwitchInitHandler;
 import com.tejchen.switchclient.remote.handler.JSwitchListenHandler;
 import com.tejchen.switchclient.remote.handler.JSwitchPullHandler;
 import com.tejchen.switchclient.remote.handler.JSwitchPushHandler;
@@ -50,8 +50,8 @@ public class JSwitchManager {
         }
 
         // 解析注解
-        List<JSwitchConfig> configList = AnnotationHelper.parseAnnotation(appName, classes);
-        if (configList.isEmpty()) {
+        List<CacheData> cacheDataList = AnnotationHelper.parseAnnotation(appName, classes);
+        if (cacheDataList.isEmpty()) {
             throw new JSwitchException("empty config!");
         }
 
@@ -59,28 +59,28 @@ public class JSwitchManager {
         proxy = JSwitchServerHelper.getProxy(server);
 
         // 连接
-        JSwitchRemoteHandle connectHandle = new JSwitchConnectHandler(appName, proxy);
-        connectHandle.addItem(serverUrl);
-        connectHandle.handle();
+        JSwitchRemoteHandle initHandle = new JSwitchInitHandler(appName, proxy);
+        initHandle.append(serverUrl);
+        initHandle.handle();
 
         // 拉取配置
         JSwitchRemoteHandle pullHandler = new JSwitchPullHandler(appName, proxy);
-        for (JSwitchConfig jswitchConfig : configList) {
-            pullHandler.addItem(jswitchConfig);
+        for (CacheData cacheData : cacheDataList) {
+            pullHandler.append(cacheData);
         }
         pullHandler.handle();
 
         // 添加监听
         JSwitchRemoteHandle listenHandler = new JSwitchListenHandler(appName, proxy);
-        for (JSwitchConfig jswitchConfig : configList) {
-            listenHandler.addItem(jswitchConfig);
+        for (CacheData cacheData : cacheDataList) {
+            listenHandler.append(cacheData);
         }
         listenHandler.handle();
 
         // 推送配置
         JSwitchRemoteHandle pushHandler = new JSwitchPushHandler(appName, proxy);
-        for (JSwitchConfig jswitchConfig : configList) {
-            pushHandler.addItem(jswitchConfig);
+        for (CacheData cacheData : cacheDataList) {
+            pushHandler.append(cacheData);
         }
         pushHandler.handle();
     }

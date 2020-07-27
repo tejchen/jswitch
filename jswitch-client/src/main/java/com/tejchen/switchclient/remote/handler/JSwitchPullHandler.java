@@ -1,7 +1,7 @@
 package com.tejchen.switchclient.remote.handler;
 
 
-import com.tejchen.switchclient.model.JSwitchConfig;
+import com.tejchen.switchclient.model.CacheData;
 import com.tejchen.switchclient.remote.JSwitchRemoteHandle;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import lombok.Getter;
@@ -16,37 +16,37 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 @ToString
-public class JSwitchPullHandler implements JSwitchRemoteHandle<JSwitchConfig> {
+public class JSwitchPullHandler implements JSwitchRemoteHandle<CacheData> {
 
     private JSwitchServerProxy          proxy;
 
-    private List<JSwitchConfig>         jswitchConfigs;
+    private List<CacheData>             cacheDataList;
 
     private String                      appName;
 
     public JSwitchPullHandler(String appName, JSwitchServerProxy proxy) {
         this.appName = appName;
         this.proxy = proxy;
-        this.jswitchConfigs = new ArrayList<>();
+        this.cacheDataList = new ArrayList<>();
     }
 
-    public void addItem(JSwitchConfig jswitchConfig){
-        jswitchConfigs.add(jswitchConfig);
+    public void append(CacheData cacheData){
+        cacheDataList.add(cacheData);
     }
 
     public void handle() {
-        if (!this.jswitchConfigs.isEmpty()) {
-            List<String> keys = jswitchConfigs.stream().map(JSwitchConfig::getConfigCode).collect(Collectors.toList());
+        if (!this.cacheDataList.isEmpty()) {
+            List<String> keys = cacheDataList.stream().map(CacheData::getConfigCode).collect(Collectors.toList());
             Map<String, String> result = proxy.pull(appName, keys);
             if (result == null){
                 return;
             }
-            for (JSwitchConfig jswitchConfig : jswitchConfigs) {
-                String configValue = result.get(jswitchConfig.getConfigCode());
+            for (CacheData cacheData : cacheDataList) {
+                String configValue = result.get(cacheData.getConfigCode());
                 if (configValue == null){
                     continue;
                 }
-                jswitchConfig.updateConfig(configValue);
+                cacheData.update(configValue);
             }
         }
     }

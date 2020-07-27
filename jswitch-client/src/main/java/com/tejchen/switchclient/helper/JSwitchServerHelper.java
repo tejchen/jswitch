@@ -1,6 +1,6 @@
 package com.tejchen.switchclient.helper;
 
-import com.tejchen.switchclient.remote.proxy.DefaultJSwitchServerProxy;
+import com.tejchen.switchclient.remote.proxy.HttpServerProxy;
 import com.tejchen.switchclient.remote.JSwitchServerProxy;
 import com.tejchen.switchclient.remote.proxy.ZookeeperServerProxy;
 import com.tejchen.switchcommon.JSwitchServer;
@@ -11,7 +11,7 @@ public class JSwitchServerHelper {
     public static JSwitchServerProxy getProxy(JSwitchServer server) {
         switch (server){
             case Default:
-                return new DefaultJSwitchServerProxy();
+                return new HttpServerProxy();
             case ZooKeeper:
                 return new ZookeeperServerProxy();
         }

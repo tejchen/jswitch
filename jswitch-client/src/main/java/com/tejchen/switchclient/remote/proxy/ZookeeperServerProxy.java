@@ -26,7 +26,7 @@ public class ZookeeperServerProxy implements JSwitchServerProxy {
     private Map<String, JSwitchListener> listenerMap = new HashMap<>();
 
     @Override
-    public boolean connect(String appCode, String server) {
+    public boolean init(String appCode, String server) {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         client = CuratorFrameworkFactory.newClient(server, retryPolicy);
         client.start();
@@ -109,11 +109,11 @@ public class ZookeeperServerProxy implements JSwitchServerProxy {
         cache.getListenable().addListener(() -> {
             byte[] data = cache.getCurrentData().getData();
             if (data == null){
-                listener.onChange(null);
+                listener.receiveConfig(null);
                 return;
             }
             String config = new String(data, StandardCharsets.UTF_8);
-            listener.onChange(config);
+            listener.receiveConfig(config);
         });
         try{
             cache.start();

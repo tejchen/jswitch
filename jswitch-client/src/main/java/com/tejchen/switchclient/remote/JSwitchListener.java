@@ -8,5 +8,5 @@ public interface JSwitchListener {
 
     String listenKey();
 
-    boolean onChange(String newConfigText) throws JSwitchException;
+    boolean receiveConfig(String val) throws JSwitchException;
 }
