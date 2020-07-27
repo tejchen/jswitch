@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="com.tejchen.switchclient.JSwitchSpringManager" init-method="init">
+        <property name="url" value="http://127.0.0.1:8080"/>
+        <property name="server" value="Default"/>
+        <property name="appCode" value="TEST_APP"/>
+    </bean>
+</beans>
